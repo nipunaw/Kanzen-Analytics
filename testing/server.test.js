@@ -48,8 +48,8 @@ describe('UF Directory Server Unit Tests', function() {
           In the second, assert what we should  see.
           Finally, call "done();" to move on to the next test.
         */
-        should.not.exist(error)
-        should.exist(response)
+        should.not.exist(error);
+        should.exist(response);
 
          done();
       });
@@ -63,12 +63,12 @@ describe('UF Directory Server Unit Tests', function() {
       request.get('http://localhost:8080/listings', function(error, response, body) {
       	
       	// First let's assert that the body being passed by the get request actually exists or not with our general assertions, similar to the previous test:
-       	should.exist(response)
-
+       	should.exist(body);
+        should.exist(response);
 			// Next, use deepEquals() for object level comparison. We want to assert that the "listings" JSON provided by the get request is the same as the JSON file provided by the test (bodyData)
 			// Finally, call "done();" to move onto the next test
         	bodyData = JSON.parse(body);
-        	deepEqual(bodyData,listings,'Body from request is not correct')
+        	deepEqual(bodyData,listings,'Body from request is not correct');
           //deepEquals(bodyData,body, 'Get request is same as JSON file provided');
           done();
       });
@@ -78,7 +78,7 @@ describe('UF Directory Server Unit Tests', function() {
     it('responds with a 404 error to other GET requests', function(done) {
       request.get('http://localhost:8080/pizza', function(error, response, body) {
       	// First, assert that the status code is what it's supposed to be (exactly 404) if the listing were missing.
-        response.statusCode.should.equal(404)
+        response.statusCode.should.equal(404);
         
         // For the last assertion, check that the string output is the same message server.js outputs when a listing is missing:
         // Finally, call "done();" to finish!
