@@ -1,35 +1,20 @@
-jobs:
-  test:
-    executor:
-      name: node/default
-      tag: '13.14'
-    steps:
-      - checkout
-      - node/install-packages
-      - run:
-          command: npm run test
-  install-npm:
-    executor: node/default
-    steps:
-      - checkout
-      - node/install-packages:
-          cache-path: ~/project/node_modules
-          override-ci-command: npm install
-      - run: npm run test
-  install-node:
-    docker:
-      - image: 'cimg/base:stable'
-    steps:
-      - checkout
-      - node/install:
-          install-yarn: true
-      - run: node --version
+version: 2.1
 orbs:
   node: circleci/node@1.1.0
-version: 2.1
-workflows:
-  test_my_app:
-    jobs:
-      - install-node
-      - install-npm
-      - test
+jobs:
+  build:
+    executor:
+      name: node/default
+      tag: '10.4'
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: npm install mocha
+            - run: alias mocha='./node_modules/.bin/_mocha'
+            - run: npm install
+      - run:
+          command: npm start
+          background: true
+      - run: sleep 5
+      - run: npm run test
