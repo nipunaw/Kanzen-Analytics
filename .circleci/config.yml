@@ -3,7 +3,6 @@ orbs:
   node: circleci/node@1.1.0
 jobs:
   build:
-    working_directory: ~/testing
     executor:
       name: node/default
       tag: '10.4'
@@ -13,7 +12,7 @@ jobs:
           steps:
             - run: npm install mocha
             - run: alias mocha='./node_modules/.bin/_mocha'
-            - run: npm install
+            - run: npm install --no-package-lock
       - run:
           command: npm start
           background: true
