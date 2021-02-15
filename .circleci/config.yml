@@ -17,6 +17,8 @@ jobs:
           override-ci-command: npm install
       - run: npm run test
   install-node:
+     docker:
+        - image: 'cimg/base:stable'
     steps:
       - checkout
       - node/install:
