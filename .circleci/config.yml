@@ -7,16 +7,16 @@ jobs:
     steps:
       - checkout
       - node/install-packages:
-          cache-path: ~/testing/node_modules
-          app-dir: ~/testing
+          cache-path: ~/Kanzen-Analytics/testing/node_modules
+          app-dir: ~/Kanzen-Analytics/testing
           override-ci-command: npm install
       - run: 
           command: npm start
-          working_directory: ~/testing
+          working_directory: ~/Kanzen-Analytics/testing
           background: true
       - run:
           command: npx mocha server.test.js
-          working_directory: ~/testing
+          working_directory: ~/Kanzen-Analytics/testing
 workflows:
   assignments:
     jobs:
