@@ -1,4 +1,4 @@
-obs:
+jobs:
   test:
     executor:
       name: node/default
