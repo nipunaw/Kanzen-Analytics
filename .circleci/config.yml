@@ -17,5 +17,7 @@ jobs:
           working_directory: ~/project/testing
           background: true
       - run:
+          sleep 5
+      - run:
           command: npx mocha server.test.js
           working_directory: ~/project/testing
