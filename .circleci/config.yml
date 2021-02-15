@@ -1,4 +1,20 @@
 jobs:
+  install-node:
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: true
+      - run: node --version
+jobs:
+  install-npm:
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
+      - run: npm run test
+jobs:
   test:
     executor:
       name: node/default
@@ -14,4 +30,6 @@ version: 2.1
 workflows:
   test_my_app:
     jobs:
+      - install-node
+      - install-npm
       - test
