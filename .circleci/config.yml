@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@4.1.0
+
 jobs:
   build:
     executor: 
@@ -21,7 +22,3 @@ jobs:
       - run:
           command: npx mocha server.test.js
           working_directory: ~/project/testing
-workflows:
-  testing:
-    jobs:
-      - build
