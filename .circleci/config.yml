@@ -21,3 +21,7 @@ jobs:
       - run:
           command: npx mocha server.test.js
           working_directory: ~/project/testing
+workflows:
+  testing:
+    jobs:
+      - build
