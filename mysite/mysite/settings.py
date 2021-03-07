@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,14 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'vg8eek&m8c=6!9=0bdt8w=_*3+ob&tow^t^qw5+*5-a)o-u)n@'
+SECRET_KEY = '#cztue-04&(&za20ven+c1kkz^+kn5*mua-4hx4a!wz!l58e*9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,11 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
     'home.apps.HomeConfig',
+    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
     'channels',
     'channels_redis'
-
 ]
 
 MIDDLEWARE = [
@@ -77,23 +77,24 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-"""
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-"""
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'kanzen',
         'USER': 'postgres',
-        'PASSWORD':'password',
+        'PASSWORD': 'password',
         'HOST': 'localhost'
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -127,16 +128,15 @@ USE_L10N = True
 
 USE_TZ = True
 
-CRISPY_TEMPLATE_PACK = 'bootstap4'
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 ASGI_APPLICATION = 'mysite.routing.application'
-
 CHANNEL_LAYERS = {
-    'default':{
-        'BACKEND': ' channels_redis.core.RedisChannelLayer',
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts':[{'127.0.0.1',6379}],
-        },
+            'hosts': [{'127.0.0.1', 6379,}],
+        }
     }
 }
 
@@ -151,9 +151,10 @@ PLOTLY_COMPONENTS = [
     'dash_core_components',
     'dash_html_components',
     'dash_renderer',
-    'dpd_components'
 
+    'dpd_components'
 ]
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATICFILES_LOCATION = 'static'
@@ -162,3 +163,4 @@ STATIC_ROOT = 'static'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mysite/static')
 ]
+X_FRAME_OPTIONS = 'SAMEORIGIN'
