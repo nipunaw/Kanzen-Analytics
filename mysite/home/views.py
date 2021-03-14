@@ -13,7 +13,7 @@ def home(request):
             y=y1
         )
         layout = dict(
-            title='Simple Graph',
+            title='Top 5 Results:',
             xaxis=dict(range=[min(x1), max(x1)]),
             yaxis=dict(range=[min(y1), max(y1)])
         )
