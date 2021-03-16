@@ -3,14 +3,22 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 from django_plotly_dash import DjangoDash
+from jikanpy import Jikan
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = DjangoDash('SimpleExample', external_stylesheets=external_stylesheets)
 
 
+def get_names():
+    aio_jikan_2 = Jikan()
+    top_anime = aio_jikan_2.top(type='anime', page=1, subtype='tv')
+    return top_anime["top"][0]["title"]
+
+
 app.layout = html.Div([
-    html.H1('Square Root Slider Graph'),
+    html.H1(get_names()),
+    html.Button("Custom export", id="export_table", **{"data-dummy": ""}),
     dcc.Graph(id='slider-graph', animate=True, style={"backgroundColor": "#1a2d46", 'color': '#ffffff'}),
     dcc.Slider(
         id='slider-updatemode',
@@ -23,6 +31,17 @@ app.layout = html.Div([
     ),
 ])
 
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (n_clicks > 0)
+            document.querySelector("#slider-graph a.modebar-btn").click()
+        return ""
+    }
+    """,
+    Output("export_table", "data-dummy"),
+    [Input("export_table", "n_clicks")]
+)
 
 @app.callback(
                Output('slider-graph', 'figure'),
