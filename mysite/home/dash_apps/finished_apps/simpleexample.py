@@ -4,6 +4,8 @@ from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 from django_plotly_dash import DjangoDash
 from jikanpy import Jikan
+from pytrends.request import TrendReq
+import pandas as pd
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -49,7 +51,7 @@ app.clientside_callback(
 def display_value(value):
 
 
-    x = []
+    """x = []
     for i in range(value):
         x.append(i)
 
@@ -69,5 +71,30 @@ def display_value(value):
         yaxis=dict(range=[min(y), max(y)]),
         font=dict(color='white'),
 
+    )"""
+    trendshow = TrendReq(hl='en-US', tz=360)
+    kw_list = ["CSGO", "Fortnite","League of Legends"]
+    kw_group = list(zip(*[iter(kw_list)]*1))
+    kw_grplist = [list(x) for x in kw_group]
+    dic = {}
+    i=0
+    for kw in kw_grplist:
+        trendshow.build_payload(kw,timeframe = 'today 12-m',geo='')
+        dic[i] = trendshow.interest_over_time()
+        i +=1
+
+    trendframe = pd.concat(dic,axis=1)
+    trendframe.columns = trendframe.columns.droplevel(0)
+    trendframe = trendframe.drop('isPartial',axis=1)
+    
+    
+    trace = [go.Scatter(
+        x = trendframe.index,
+        y=trendframe[col], name = col) for col in trendframe.columns]
+    layout = dict(
+        title='Test Graph',
+        paper_bgcolor='#27293d',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
     )
-    return {'data': [graph], 'layout': layout}
+    return {'data': trace, 'layout': layout}
