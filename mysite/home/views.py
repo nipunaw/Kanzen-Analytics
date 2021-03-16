@@ -25,5 +25,10 @@ def home(request):
         'plot': scatter()
     }
 
+    return render(request, 'home/index_load.html', context)
 
-    return render(request, 'home/welcome.html', context)
+def edit(request):
+    return render(request, 'home/edit_load.html')
+
+def export(request):
+    return render(request, 'home/export_load.html')
