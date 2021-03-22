@@ -1,7 +1,8 @@
 from home.dash_apps.finished_apps import graphs
+from dash.dependencies import Input, Output, State
 
-test = graphs.Graphs('SimpleExample', 'Top 5 anime', 'topanime', 'topanimeslider', True)
-test2 = graphs.Graphs('SimpleExample2', 'Jojo Data', 'randomanime', 'randomanimeslider', False, "Jojo")
+test = graphs.Graphs('SimpleExample', 'Top 5 anime', 'topanime', 'topanimeslider', True, [Input('topanimeslider', 'value')])
+test2 = graphs.Graphs('SimpleExample2', 'Jojo Data', 'randomanime', 'randomanimeslider', False, [Input('randomanimeslider', 'value')], "Jojo")
 
 # import dash_core_components as dcc
 # import dash_html_components as html

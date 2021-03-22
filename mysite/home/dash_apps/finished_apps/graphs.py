@@ -11,7 +11,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
 class Graphs:
-    def __init__(self, app_name, graph_title, graph_id, slider_id, top_bool, anime_name="default"):
+    def __init__(self, app_name, graph_title, graph_id, slider_id, top_bool, app_input_state_list, anime_name="default"):
         self.jikan = Jikan()
 
         def get_top_anime_names(rank: int, subtype: str):
@@ -54,7 +54,7 @@ class Graphs:
 
         @self.app.callback(
             Output(graph_id, 'figure'),
-            [Input(slider_id, 'value')])
+            app_input_state_list)
         def display_value(value):
 
             trendshow = TrendReq(hl='en-US', tz=360)
