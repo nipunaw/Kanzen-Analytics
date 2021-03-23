@@ -1,8 +1,15 @@
 from home.dash_apps.finished_apps import graphs
+from home.dash_apps.finished_apps import container
 from dash.dependencies import Input, Output, State
 
-test = graphs.Graphs('SimpleExample', 'Top 5 anime', 'topanime', 'topanimeslider', True, [Input('topanimeslider', 'value')])
-test2 = graphs.Graphs('SimpleExample2', 'Jojo Data', 'randomanime', 'randomanimeslider', False, [Input('randomanimeslider', 'value')], "Jojo")
+
+initial_graphs = []
+top_shows = graphs.Graphs('SimpleExample', 'Top 5 Anime', 'topanime', 'topanimeslider', True, [Input('topanimeslider', 'value')])
+
+initial_graphs.append(top_shows)
+
+container_object = container.Container(initial_graphs)
+
 
 # import dash_core_components as dcc
 # import dash_html_components as html
