@@ -1,5 +1,7 @@
+import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from datetime import date
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 from django_plotly_dash import DjangoDash
@@ -8,6 +10,7 @@ from jikanpy import Jikan
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = DjangoDash('SimpleExample', external_stylesheets=external_stylesheets)
+
 
 
 def get_names():
@@ -29,7 +32,65 @@ app.layout = html.Div([
         updatemode='drag',
         min=0,
     ),
+
+    html.Div(dcc.Input(id='input-box', placeholder='Search:', type='text')),
+
+    html.Button('Apply Filters', id='button'),
+
+html.Div(id='output-container-button',
+             children='Genre:'),
+
+dcc.Dropdown(
+        options=[
+            {'label': 'Any', 'value': '1'},
+            {'label': 'Action', 'value': '2'},
+            {'label': 'Adventure', 'value': '3'},
+            {'label': 'BL', 'value': '4'},
+            {'label': 'Comedy', 'value': '5'},
+            {'label': 'Drama', 'value': '6'},
+        ],
+        value='1'
+    ),
+
+html.Div(id='output-container-button',
+             children='Category:'),
+
+dcc.Dropdown(
+        options=[
+            {'label': 'Any', 'value': '1'},
+            {'label': 'Movie', 'value': '2'},
+            {'label': 'TV', 'value': '3'},
+            {'label': 'Manga', 'value': '4'},
+        ],
+        value='1'
+    ),
+
+html.Div(id='output-container-button',
+             children='Select the range of data:'),
+
+    dcc.DatePickerRange(
+        id='date-picker-range',
+        start_date=date(2020, 3, 23),
+        end_date_placeholder_text='Select a date!'
+    ),
+
 ])
+
+
+@app.callback(
+    dash.dependencies.Output('output-container-button', 'children'),
+    [dash.dependencies.Input('button', 'n_clicks')],
+    [dash.dependencies.State('input-box', 'value')])
+def update_output(value):
+    return 'Filtered By: "{}" '.format(
+        value
+    )
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
+
+
+
 
 app.clientside_callback(
     """
@@ -71,3 +132,5 @@ def display_value(value):
 
     )
     return {'data': [graph], 'layout': layout}
+
+
