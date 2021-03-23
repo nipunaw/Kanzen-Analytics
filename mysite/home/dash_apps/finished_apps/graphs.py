@@ -24,18 +24,32 @@ class Graphs:
         self.app = DjangoDash(app_name, external_stylesheets=external_stylesheets)
         self.app.layout = html.Div([
             html.H1(graph_title),
-            # html.Button("Custom export", id="export_table", **{"data-dummy": ""}),
+            #html.Button("Custom export", id="export_table", **{"data-dummy": ""}),
             self.return_graph(), # dcc.Graph(id=graph_id, animate=True, style={"backgroundColor": "#1a2d46", 'color': '#ffffff'})
-            dcc.Slider(
-                id=slider_id,
-                marks={i: '{}'.format(i) for i in range(20)},
-                max=20,
-                value=2,
-                step=1,
-                updatemode='drag',
-                min=0,
-            ),
+            # html.Button("Custom export", id="export_table", **{"data-dummy": ""}),
+            # dcc.Slider(
+            #     id=slider_id,
+            #     marks={i: '{}'.format(i) for i in range(20)},
+            #     max=20,
+            #     value=2,
+            #     step=1,
+            #     updatemode='drag',
+            #     min=0,
+            # ),
         ])
+
+        self.app.clientside_callback(
+            """
+            function(n_clicks) {
+                if (n_clicks > 0)
+                    document.querySelector("#topanime a.modebar-btn").click()
+                return ""
+            }
+            """,
+            Output("export_table", "data-dummy"),
+            [Input("export_table", "n_clicks")]
+        )
+
 
         @self.app.callback(
             Output(graph_id, 'figure'),
@@ -74,6 +88,8 @@ class Graphs:
             return {'data': trace, 'layout': layout}
 
 
+
+
     def get_top_anime_names(self, rank: int, subtype: str):
         top_anime = self.jikan.top(type='anime', page=1, subtype=subtype)
         return top_anime["top"][rank]["title"]
@@ -82,17 +98,7 @@ class Graphs:
         search = self.jikan.search('anime', anime_name)
         return search["results"][0]["title"]
 
-    # self.app.clientside_callback(
-    #     """
-    #     function(n_clicks) {
-    #         if (n_clicks > 0)
-    #             document.querySelector("#slider-graph a.modebar-btn").click()
-    #         return ""
-    #     }
-    #     """,
-    #     Output("export_table", "data-dummy"),
-    #     [Input("export_table", "n_clicks")]
-    # )
+
 
     def return_graph(self):
         trendshow = TrendReq(hl='en-US', tz=360)

@@ -86,7 +86,6 @@ class Container:
                 for i in names_to_query:
                     test = graphs.Graphs(i + 'app', i + ' Graph', i, i + 'slider', False,
                                          [Input(i + 'slider', 'value')], i)
-
                     self.graphs_list.append(
                         test.return_layout())  # dcc.Graph(id='graph-{}'.format(n_clicks), figure=test.return_fig())
 
