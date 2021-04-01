@@ -84,6 +84,8 @@ class Graphs:
                 paper_bgcolor='#27293d',
                 plot_bgcolor='rgba(0,0,0,0)',
                 font=dict(color='white'),
+                showlegend=True
+                
             )
             return {'data': trace, 'layout': layout}
 
@@ -130,6 +132,7 @@ class Graphs:
                 paper_bgcolor='#27293d',
                 plot_bgcolor='rgba(0,0,0,0)',
                 font=dict(color='white'),
+                showlegend=True
             )
         }
 
