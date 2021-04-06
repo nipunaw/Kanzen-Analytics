@@ -15,9 +15,10 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 class Container:
     def __init__(self, id:str,initial_graphs=None, edit_page=False):
+        self.graphs_list = []
         if  edit_page==False:
             self.jikan = Jikan()
-            self.graphs_list = []
+            
             if initial_graphs is None:
                 self.graphs_list = []
             else:
@@ -46,7 +47,6 @@ class Container:
                 [Input('search_button', 'n_clicks'),
                 State('graphname', 'value')]
             )
-
             def update_table(n_clicks, value):
                 data = []
                 dropdown = {}
@@ -94,6 +94,9 @@ class Container:
                 return html.Div(self.graphs_list)
         # edit page init
         else:
+            #DEBUG
+            self.graphs_list = ["Demon Slayer","Sailor Moon", "Jojo"]
+            #print(self.graphs_list)
             self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
             self.app.layout = html.Div([
                 #html.H1("Create New Graph"),
@@ -104,9 +107,35 @@ class Container:
             @self.app.callback(
                 [Output('table', 'data'),
                 Output('table', 'dropdown')],
-                [Input('remove_graphs','n_clicks')])
-            def remove_graphs(n_clicks):
-                ye=1
+                [Input('remove_graphs','n_clicks'),
+                State('table', 'data')])
+            def remove_graphs(n_clicks,value):
+                data = []
+                dropdown = {
+                        'Remove Graph(s)': {
+                            'options': [
+                                {'label': "Don't remove Graph", 'value': "Don't remove Graph"},
+                                {'label': "Remove Graph", 'value': "Remove Graph"}
+                            ]
+                        }
+                    }
+                
+        
+                graphs_to_remove = []
+                #print(self.graphs_list)
+                if n_clicks >0:
+                    #print(data)
+                    for i in value:
+                        #print(i)
+                        if i['Remove Graph(s)'] == 'Remove Graph':
+                            graphs_to_remove.append(i['Name'])    
+                    for name in graphs_to_remove:
+                            self.graphs_list.remove(name)
+                            #print(self.graphs_list)
+                            
+                for title in self.graphs_list:
+                        data.append({'Name':title,'Remove Graph(s)':"Don't remove Graph"})
+                return data, dropdown
 
 
         
@@ -120,14 +149,14 @@ class Container:
     def init_table(self, type:str='Add', pg_size:int=5):
         layout = dash_table.DataTable(
             id='table',
-            columns=[{"name": "Name", "id": "Name"}, {"name": type+' Graph(s)', "id": 'Add Graph(s)', "presentation": "dropdown"}],
-            data=[{'Name': "", 'Add Graph(s)': ""},
-                  {'Name': "", 'Add Graph(s)': ""},
-                  {'Name': "", 'Add Graph(s)': ""},
-                  {'Name': "", 'Add Graph(s)': ""},
-                  {'Name': "", 'Add Graph(s)': ""}],
+            columns=[{"name": "Name", "id": "Name"}, {"name": type+' Graph(s)', "id": type+' Graph(s)', "presentation": "dropdown"}],
+            data=[{'Name': "", type+' Graph(s)': ""},
+                  {'Name': "", type+' Graph(s)': ""},
+                  {'Name': "", type+' Graph(s)': ""},
+                  {'Name': "", type+' Graph(s)': ""},
+                  {'Name': "", type+' Graph(s)': ""}],
             page_size=pg_size,
-            editable=True
+            editable=True,
         )
 
         return layout
