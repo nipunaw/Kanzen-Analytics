@@ -3,4 +3,7 @@
 {% block content %}
     {% load plotly_dash %}
 <h1>Edit Page</h1>
+<div class="{% plotly_class name='edit_container' %} card" style="height: 100%; width: 100%">
+        {% plotly_app name='edit_container' ratio=0.45 %}
+    </div>
 {% endblock %}

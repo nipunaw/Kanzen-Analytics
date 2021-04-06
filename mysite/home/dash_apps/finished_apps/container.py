@@ -84,7 +84,6 @@ class Container:
 
                 if n_clicks > 0 and len(names_to_query) > 0:
                     for i in names_to_query:
-                        self.num_graphs +=1
                         test = graphs.Graphs(i + 'app', i + ' Graph', i, i + 'slider', False,
                                             [Input(i + 'slider', 'value')], i)
                         
