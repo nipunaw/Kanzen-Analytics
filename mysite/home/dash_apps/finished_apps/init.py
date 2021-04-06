@@ -8,9 +8,9 @@ top_shows = graphs.Graphs('SimpleExample', 'Top 5 Anime', 'topanime', 'topanimes
 
 initial_graphs.append(top_shows)
 
-container_object = container.Container(initial_graphs)
+container_object = container.Container('container',initial_graphs,False)
 
-
+edit_page_container = container.Container('edit_container',[],True)
 # import dash_core_components as dcc
 # import dash_html_components as html
 # from dash.dependencies import Input, Output
