@@ -8,6 +8,7 @@ from jikanpy import Jikan
 from pytrends.request import TrendReq
 import pandas as pd
 from home.dash_apps.finished_apps import graphs
+from datetime import date
 
 # Stores all custom graphs
 
@@ -30,10 +31,48 @@ class Container:
                 #html.H1("Create New Graph"),
                 dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
                 html.Button(id="search_button", n_clicks=0, children="Search"),
+                html.Div(id='output-container-button',children='Genre:'),
+                dcc.Dropdown(
+                    options=[
+                        {'label': 'Any', 'value': '1'},
+                        {'label': 'Action', 'value': '2'},
+                        {'label': 'Adventure', 'value': '3'},
+                        {'label': 'BL', 'value': '4'},
+                        {'label': 'Comedy', 'value': '5'},
+                        {'label': 'Drama', 'value': '6'},
+                    ],
+                    value='1'
+                ),
+
+                html.Div(id='output-container-button',
+                         children='Category:'),
+
+                dcc.Dropdown(
+                    options=[
+                        {'label': 'Any', 'value': '1'},
+                        {'label': 'Movie', 'value': '2'},
+                        {'label': 'TV', 'value': '3'},
+                        {'label': 'Manga', 'value': '4'},
+                    ],
+                    value='1'
+                ),
+
+                html.Div(id='output-container-button',
+                         children='Select the range of data:'),
+
+                dcc.DatePickerRange(
+                    id='date-picker-range',
+                    start_date=date(2020, 3, 23),
+                    end_date_placeholder_text='Select a date!'
+                ),
+
                 self.init_table(),
                 html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
-                html.Div(id="graphcontainer")
+                html.Div(id="graphcontainer"),
+
             ])
+
+
 
             # @self.app.callback(
             #     Output('graphcontainer', 'children'),
@@ -131,3 +170,4 @@ class Container:
         )
 
         return layout
+
