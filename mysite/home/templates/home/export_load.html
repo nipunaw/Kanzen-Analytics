@@ -2,5 +2,7 @@
 {% load static %}
 {% block content %}
     {% load plotly_dash %}
-<h1>Export Page</h1>
+<div class="{% plotly_class name='export_container' %} card" style="height: 100%; width: 50%">
+        {% plotly_app name='export_container' ratio=0.45 %}
+</div>
 {% endblock %}
