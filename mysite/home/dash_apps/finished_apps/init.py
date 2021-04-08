@@ -1,12 +1,19 @@
 from home.dash_apps.finished_apps import graphs
 from home.dash_apps.finished_apps import container
 from dash.dependencies import Input, Output, State
-
+from home.models import Anime
+import time
 
 initial_graphs = []
-top_shows = graphs.Graphs('SimpleExample', 'Top 5 Anime', 'topanime', 'topanimeslider', True, [Input('topanimeslider', 'value')])
+#top_shows = graphs.Graphs('top5anime', 'Top 5 Anime', 'topanime', 'topanimeslider', True, [Input('topanimeslider', 'value')])
 
-initial_graphs.append(top_shows)
+#initial_graphs.append(top_shows)
+
+for a in Anime.objects.raw('SELECT * FROM home_anime'):
+     p = str(a)
+     time.sleep(2)
+     initial_graphs.append(graphs.Graphs(p.replace(" ", ""), p, p.replace(" ", ""), p.replace(" ", "")+'slider', False, [Input(p.replace(" ", "")+'slider', 'value')], p))
+
 
 container_object = container.Container(initial_graphs)
 

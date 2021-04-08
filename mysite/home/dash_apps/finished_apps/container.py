@@ -8,6 +8,7 @@ from jikanpy import Jikan
 from pytrends.request import TrendReq
 import pandas as pd
 from home.dash_apps.finished_apps import graphs
+from home.models import Anime
 
 # Stores all custom graphs
 
@@ -81,6 +82,8 @@ class Container:
             for i in data:
                 if i['Add Graph(s)'] == 'Add Graph':
                     names_to_query.append(i['Name'])
+                    a = Anime(anime_name=i['Name'])
+                    a.save()
 
             if n_clicks > 0 and len(names_to_query) > 0:
                 for i in names_to_query:
@@ -88,12 +91,15 @@ class Container:
                                          [Input(i + 'slider', 'value')], i)
                     self.graphs_list.append(
                         test.return_layout())  # dcc.Graph(id='graph-{}'.format(n_clicks), figure=test.return_fig())
-
             return html.Div(self.graphs_list)
 
 
     def search_anime(self, anime_name):
         search = self.jikan.search('anime', anime_name)
+        user = self.jikan.user_list(38000)
+        print(user)
+        #print(user['birthday'])
+        #print(user['gender'])
         return search["results"]
 
 
