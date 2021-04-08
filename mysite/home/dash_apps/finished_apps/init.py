@@ -1,5 +1,7 @@
 from home.dash_apps.finished_apps import graphs
 from home.dash_apps.finished_apps import container
+from home.dash_apps.finished_apps import edit_container
+from home.dash_apps.finished_apps import export_container
 from dash.dependencies import Input, Output, State
 
 
@@ -8,9 +10,11 @@ top_shows = graphs.Graphs('SimpleExample', 'Top 5 Anime', 'topanime', 'topanimes
 
 initial_graphs.append(top_shows)
 
-container_object = container.Container(initial_graphs)
+container_object = container.Container('container',initial_graphs)
 
+edit_page_container = edit_container.Edit_Container('edit_container')
 
+export_page_container = export_container.Export_Container('export_container')
 # import dash_core_components as dcc
 # import dash_html_components as html
 # from dash.dependencies import Input, Output

@@ -14,17 +14,18 @@ from home.dash_apps.finished_apps import graphs
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 class Container:
-
-    def __init__(self, initial_graphs=None):
-        self.jikan = Jikan()
+    def __init__(self, id:str,initial_graphs=None, edit_page=False):
         self.graphs_list = []
+        
+        self.jikan = Jikan()
+        
         if initial_graphs is None:
             self.graphs_list = []
         else:
             for i in initial_graphs:
                 self.graphs_list.append(i.return_layout())
 
-        self.app = DjangoDash('container', external_stylesheets=external_stylesheets)
+        self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
 
         self.app.layout = html.Div([
             #html.H1("Create New Graph"),
@@ -44,9 +45,8 @@ class Container:
             [Output('table', 'data'),
             Output('table', 'dropdown')],
             [Input('search_button', 'n_clicks'),
-             State('graphname', 'value')]
+            State('graphname', 'value')]
         )
-
         def update_table(n_clicks, value):
             data = []
             dropdown = {}
@@ -71,7 +71,7 @@ class Container:
         @self.app.callback(
             Output('graphcontainer', 'children'),
             [Input('add_graphs', 'n_clicks'),
-             State('table', 'data')]
+            State('table', 'data')]
         )
         def add_graph(n_clicks, data):
             id = 'graph-{}'.format(n_clicks)
@@ -85,11 +85,18 @@ class Container:
             if n_clicks > 0 and len(names_to_query) > 0:
                 for i in names_to_query:
                     test = graphs.Graphs(i + 'app', i + ' Graph', i, i + 'slider', False,
-                                         [Input(i + 'slider', 'value')], i)
+                                        [Input(i + 'slider', 'value')], i)
+                    
                     self.graphs_list.append(
-                        test.return_layout())  # dcc.Graph(id='graph-{}'.format(n_clicks), figure=test.return_fig())
+                        test.return_layout()) 
+                    
 
             return html.Div(self.graphs_list)
+        
+            
+
+
+        
 
 
     def search_anime(self, anime_name):
@@ -97,18 +104,18 @@ class Container:
         return search["results"]
 
 
-
-    def init_table(self):
+    def init_table(self, type:str='Add', pg_size:int=5):
         layout = dash_table.DataTable(
             id='table',
-            columns=[{"name": "Name", "id": "Name"}, {"name": 'Add Graph(s)', "id": 'Add Graph(s)', "presentation": "dropdown"}],
-            data=[{'Name': "", 'Add Graph(s)': ""},
-                  {'Name': "", 'Add Graph(s)': ""},
-                  {'Name': "", 'Add Graph(s)': ""},
-                  {'Name': "", 'Add Graph(s)': ""},
-                  {'Name': "", 'Add Graph(s)': ""}],
-            page_size=5,
-            editable=True
+            columns=[{"name": "Name", "id": "Name"}, {"name": type+' Graph(s)', "id": type+' Graph(s)', "presentation": "dropdown"}],
+            data=[{'Name': "", type+' Graph(s)': ""},
+                  {'Name': "", type+' Graph(s)': ""},
+                  {'Name': "", type+' Graph(s)': ""},
+                  {'Name': "", type+' Graph(s)': ""},
+                  {'Name': "", type+' Graph(s)': ""}],
+            page_size=pg_size,
+            editable=True,
+            #row_deletable=True,
         )
 
         return layout
