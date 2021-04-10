@@ -2,39 +2,26 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 from dash.dependencies import Input, Output, State
-import plotly.graph_objs as go
 from django_plotly_dash import DjangoDash
 from jikanpy import Jikan
-from pytrends.request import TrendReq
-import pandas as pd
 from home.dash_apps.finished_apps import graphs
+from home.models import Anime
 
 # Stores all custom graphs
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 class Container:
-    def __init__(self, id:str,initial_graphs=None, edit_page=False):
+
+    def __init__(self, id:str, shared_info):
+        self.shared_info = shared_info
+        self.shared_info.pending_updates_main = True
         self.graphs_list = []
-        
         self.jikan = Jikan()
-        
-        if initial_graphs is None:
-            self.graphs_list = []
-        else:
-            for i in initial_graphs:
-                self.graphs_list.append(i.return_layout())
+        self.div = html.Div(id="graphcontainer")
 
         self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
-
-        self.app.layout = html.Div([
-            #html.H1("Create New Graph"),
-            dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
-            html.Button(id="search_button", n_clicks=0, children="Search"),
-            self.init_table(),
-            html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
-            html.Div(id="graphcontainer")
-        ])
+        self.app.layout = self.serve_layout
 
         # @self.app.callback(
         #     Output('graphcontainer', 'children'),
@@ -81,26 +68,56 @@ class Container:
             for i in data:
                 if i['Add Graph(s)'] == 'Add Graph':
                     names_to_query.append(i['Name'])
+                    a = Anime(anime_name=i['Name'])
+                    a.save()
 
             if n_clicks > 0 and len(names_to_query) > 0:
+                self.shared_info.pending_updates_edit = True
+                self.shared_info.pending_updates_export = True
                 for i in names_to_query:
                     test = graphs.Graphs(i + 'app', i + ' Graph', i, i + 'slider', False,
                                         [Input(i + 'slider', 'value')], i)
-                    
-                    self.graphs_list.append(
-                        test.return_layout()) 
-                    
+
+                    self.graphs_list.append(test.return_layout())  # dcc.Graph(id='graph-{}'.format(n_clicks), figure=test.return_fig())
 
             return html.Div(self.graphs_list)
-        
-            
 
+    def serve_layout(self):
+        if self.shared_info.pending_updates_main:
+            self.shared_info.pending_updates_main = False
+            self.div = html.Div(children=self.init_graph(), id="graphcontainer")
 
+        return html.Div([
+            dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
+            html.Button(id="search_button", n_clicks=0, children="Search"),
+            self.init_table(),
+            html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
+            self.div
+        ])
+
+    def init_graph(self):
+        initial_graphs = []
+        self.graphs_list = []
+        for a in Anime.objects.raw('SELECT * FROM home_anime'):
+            p = str(a)
+
+            initial_graphs.append(graphs.Graphs(p.replace(" ", ""), p, p.replace(" ", ""), p.replace(" ", "") + 'slider', False,
+                               [Input(p.replace(" ", "") + 'slider', 'value')], p))
+
+        if len(initial_graphs) != 0:
+             for i in initial_graphs:
+                 self.graphs_list.append(i.return_layout())
+
+        return html.Div(self.graphs_list)
         
 
 
     def search_anime(self, anime_name):
         search = self.jikan.search('anime', anime_name)
+        #user = self.jikan.user_list(38000)
+        #print(user)
+        #print(user['birthday'])
+        #print(user['gender'])
         return search["results"]
 
 
