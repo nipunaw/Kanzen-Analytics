@@ -89,9 +89,12 @@ class Container:
                 dcc.Dropdown(
                     options=[
                         {'label': 'Any', 'value': '1'},
-                        {'label': 'Movie', 'value': '2'},
-                        {'label': 'TV', 'value': '3'},
-                        {'label': 'Manga', 'value': '4'},
+                        {'label': 'TV', 'value': '2'},
+                        {'label': 'OVA', 'value': '3'},
+                        {'label': 'Movie', 'value': '4'},
+                        {'label': 'Special', 'value': '5'},
+                        {'label': 'ONA', 'value': '6'},
+                        {'label': 'Music', 'value': '7'},
                     ],
                     value='1'
                 ),
