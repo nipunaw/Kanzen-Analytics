@@ -6,6 +6,7 @@ from django_plotly_dash import DjangoDash
 from jikanpy import Jikan
 from home.dash_apps.finished_apps import graphs
 from home.models import Anime
+from datetime import date
 
 # Stores all custom graphs
 
@@ -90,8 +91,84 @@ class Container:
         return html.Div([
             dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
             html.Button(id="search_button", n_clicks=0, children="Search"),
+            html.Div(id='output-container-button',children='Genre:'),
+            dcc.Dropdown(
+                options=[
+                    {'label': 'Any', 'value': '1'},
+                    {'label': 'Action', 'value': '2'},
+                    {'label': 'Cars', 'value': '3'},
+                    {'label': 'Comedy', 'value': '4'},
+                    {'label': 'Dementia', 'value': '5'},
+                    {'label': 'Demons', 'value': '6'},
+                    {'label': 'Mystery', 'value': '7'},
+                    {'label': 'Drama', 'value': '8'},
+                    {'label': 'Ecchi', 'value': '9'},
+                    {'label': 'Fantasy', 'value': '10'},
+                    {'label': 'Game', 'value': '11'},
+                    {'label': 'Hentai', 'value': '12'},
+                    {'label': 'Historical', 'value': '13'},
+                    {'label': 'Horror', 'value': '14'},
+                    {'label': 'Kids', 'value': '15'},
+                    {'label': 'Magic', 'value': '16'},
+                    {'label': 'Martial Arts', 'value': '17'},
+                    {'label': 'Mecha', 'value': '18'},
+                    {'label': 'Music', 'value': '19'},
+                    {'label': 'Parody', 'value': '20'},
+                    {'label': 'Samurai', 'value': '21'},
+                    {'label': 'Romance', 'value': '22'},
+                    {'label': 'School', 'value': '23'},
+                    {'label': 'Sci Fi', 'value': '24'},
+                    {'label': 'Shoujo', 'value': '25'},
+                    {'label': 'Shoujo Ai', 'value': '26'},
+                    {'label': 'Shounen', 'value': '27'},
+                    {'label': 'Shounen Ai', 'value': '28'},
+                    {'label': 'Space', 'value': '29'},
+                    {'label': 'Sports', 'value': '30'},
+                    {'label': 'Super Power', 'value': '31'},
+                    {'label': 'Vampire', 'value': '32'},
+                    {'label': 'Yaoi', 'value': '33'},
+                    {'label': 'Yuri', 'value': '34'},
+                    {'label': 'Harem', 'value': '35'},
+                    {'label': 'Slice Of Life', 'value': '36'},
+                    {'label': 'Supernatural', 'value': '37'},
+                    {'label': 'Military', 'value': '38'},
+                    {'label': 'Police', 'value': '39'},
+                    {'label': 'Psychological', 'value': '40'},
+                    {'label': 'Thriller', 'value': '41'},
+                    {'label': 'Seinen', 'value': '42'},
+                    {'label': 'Josei', 'value': '43'},
+
+                ],
+                value='1'
+            ),
+
+            html.Div(id='output-container-button',
+                     children='Category:'),
+
+            dcc.Dropdown(
+                options=[
+                    {'label': 'Any', 'value': '1'},
+                    {'label': 'TV', 'value': '2'},
+                    {'label': 'OVA', 'value': '3'},
+                    {'label': 'Movie', 'value': '4'},
+                    {'label': 'Special', 'value': '5'},
+                    {'label': 'ONA', 'value': '6'},
+                    {'label': 'Music', 'value': '7'},
+                ],
+                value='1'
+            ),
+
+            html.Div(id='output-container-button',
+                     children='Select the range of data:'),
+
+            dcc.DatePickerRange(
+                id='date-picker-range',
+                start_date=date(2020, 3, 23),
+                end_date_placeholder_text='Select a date!'
+            ),
             self.init_table(),
             html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
+            
             self.div
         ])
 
@@ -136,3 +213,4 @@ class Container:
         )
 
         return layout
+
