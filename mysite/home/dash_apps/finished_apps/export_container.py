@@ -83,5 +83,7 @@ class Export_Container:
             trendframe = trendframe.drop('isPartial', axis=1)
             trendframe = trendframe.reset_index()
             self.trend_data=trendframe
+        else:
+            self.trend_data = pd.DataFrame()
         return data
     

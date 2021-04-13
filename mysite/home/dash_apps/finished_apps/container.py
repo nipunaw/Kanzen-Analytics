@@ -52,7 +52,7 @@ class Container:
                         ]
                     }
                 }
-
+            
             return data, dropdown
 
         @self.app.callback(
@@ -79,7 +79,7 @@ class Container:
                                         [Input(i + 'slider', 'value')], i)
 
                     self.graphs_list.append(test.return_layout())  # dcc.Graph(id='graph-{}'.format(n_clicks), figure=test.return_fig())
-
+            
             return html.Div(self.graphs_list)
 
     def serve_layout(self):
