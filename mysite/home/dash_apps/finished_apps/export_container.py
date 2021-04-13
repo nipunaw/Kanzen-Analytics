@@ -19,9 +19,18 @@ class Export_Container:
         self.table = dash_table.DataTable()
         self.app.layout = self.serve_layout
         self.trend_data = pd.DataFrame()
+        @self.app.callback(
+            [Output('table','data'),
+            Output('table','columns')],
+            [Input('table','data')]
+        )
+        def update_table(value):
+            self.init_data()
+            table_data = self.trend_data.to_dict('records')
+            table_cols = [{"name": i,"id":i}for i in self.trend_data.columns]
+            return table_data, table_cols
         
         
-
 
     def serve_layout(self):
         if self.shared_info.pending_updates_export:
