@@ -3,7 +3,11 @@ import dash_table
 from dash.dependencies import Input, Output, State
 from django_plotly_dash import DjangoDash
 from home.models import Anime
-
+from pytrends.request import TrendReq
+#from io import StringIO
+import pandas as pd
+#from dash_extensions import Download
+#from dash_extensions.snippets import send_data_frame
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 class Export_Container:
@@ -14,37 +18,10 @@ class Export_Container:
         self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
         self.table = dash_table.DataTable()
         self.app.layout = self.serve_layout
+        self.trend_data = pd.DataFrame()
+        
+        
 
-        @self.app.callback(
-            [Output('table', 'data'),
-            Output('table', 'dropdown')],
-            [Input('export_graphs','n_clicks'),
-            State('table', 'data')])
-        def remove_graphs(n_clicks,value):
-            data = []
-            dropdown = {
-                    'Export Graph(s)': {
-                        'options': [
-                            {'label': "Export Graph", 'value': "Export Graph"},
-                            {'label': "Don't Export Graph", 'value': "Don't Export Graph"}
-                        ]
-                    }
-                }
-
-            graphs_to_remove = []
-            if n_clicks >0:
-                self.shared_info.pending_updates_main = True
-                self.shared_info.pending_updates_edit = True
-                for i in value:
-                    if i['Export Graph(s)'] == 'Export Graph':
-                        graphs_to_remove.append(i['Name'])    
-                for name in graphs_to_remove:
-                        self.graphs_list.remove(name)
-                        Anime.objects.filter(pk=name).delete()
-                        
-            for title in self.graphs_list:
-                    data.append({'Name':title,'Export Graph(s)':"Don't Export Graph"})
-            return data, dropdown
 
     def serve_layout(self):
         if self.shared_info.pending_updates_export:
@@ -54,16 +31,21 @@ class Export_Container:
         return html.Div([
             html.H1("Export Page"),
             self.table,
-            html.Button('Export Selected Graphs', id="export_graphs", n_clicks=0),
+            #html.A('Download CSV', id='my_link',n_clicks=0,href=''),
+            #Download(id='download')
         ])
 
     def init_table(self, type:str='Add', pg_size:int=5):
+        names = self.init_data()
+        #print(self.trend_data)
+        
         layout = dash_table.DataTable(
             id='table',
-            columns=[{"name": "Name", "id": "Name"}, {"name": type+' Graph(s)', "id": type+' Graph(s)', "presentation": "dropdown"}],
-            data=self.init_data(),
-            page_size=pg_size,
+            data=self.trend_data.to_dict('records'),
+            columns=[{"name": i,"id":i}for i in self.trend_data.columns],
+            page_size=50,
             editable=True,
+            export_format='csv',
             #row_deletable=True,
         )
 
@@ -77,4 +59,20 @@ class Export_Container:
             self.graphs_list.append(p)
         for title in self.graphs_list:
             data.append({'Name': title, 'Export Graph(s)': "Don't Export Graph"})
+        trendshow = TrendReq(hl='en-US', tz=360)
+        kw_group = list(zip(*[iter(self.graphs_list)] * 1))
+        kw_grplist = [list(x) for x in kw_group]
+        dic = {}
+        i = 0
+        for kw in kw_grplist:
+            trendshow.build_payload(kw, timeframe='today 5-y', geo='')
+            dic[i] = trendshow.interest_over_time()
+            i += 1
+        if len(dic) > 0:
+            trendframe = pd.concat(dic, axis=1)
+            trendframe.columns = trendframe.columns.droplevel(0)
+            trendframe = trendframe.drop('isPartial', axis=1)
+            trendframe = trendframe.reset_index()
+            self.trend_data=trendframe
         return data
+    
