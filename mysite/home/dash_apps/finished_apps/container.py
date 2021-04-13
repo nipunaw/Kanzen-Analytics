@@ -12,6 +12,9 @@ from datetime import date
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
+
+
+
 class Container:
 
     def __init__(self, id:str, shared_info):
@@ -91,7 +94,8 @@ class Container:
         return html.Div([
             dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
             html.Button(id="search_button", n_clicks=0, children="Search"),
-            html.Div(id='output-container-button',children='Genre:'),
+            html.Hr(),
+            html.Div(id='genre-dropdown',children='Genre:'),
             dcc.Dropdown(
                 options=[
                     {'label': 'Any', 'value': '1'},
@@ -142,7 +146,7 @@ class Container:
                 value='1'
             ),
 
-            html.Div(id='output-container-button',
+            html.Div(id='category-dropdown',
                      children='Category:'),
 
             dcc.Dropdown(
@@ -158,7 +162,7 @@ class Container:
                 value='1'
             ),
 
-            html.Div(id='output-container-button',
+            html.Div(id='range-button',
                      children='Select the range of data:'),
 
             dcc.DatePickerRange(
@@ -166,6 +170,7 @@ class Container:
                 start_date=date(2020, 3, 23),
                 end_date_placeholder_text='Select a date!'
             ),
+            html.Hr(),
             self.init_table(),
             html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
             
