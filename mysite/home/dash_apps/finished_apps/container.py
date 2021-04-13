@@ -94,7 +94,7 @@ class Container:
         return html.Div([
             dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
             html.Button(id="search_button", n_clicks=0, children="Search"),
-            html.Hr(),
+            html.Br(),
             html.Div(id='genre-dropdown',children='Genre:'),
             dcc.Dropdown(
                 options=[
@@ -146,6 +146,8 @@ class Container:
                 value='1'
             ),
 
+            html.Br(),
+
             html.Div(id='category-dropdown',
                      children='Category:'),
 
@@ -161,7 +163,7 @@ class Container:
                 ],
                 value='1'
             ),
-
+            html.Br(),
             html.Div(id='range-button',
                      children='Select the range of data:'),
 

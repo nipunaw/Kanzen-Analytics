@@ -48,7 +48,7 @@ html {
     font-family: sans-serif;
     line-height: 1.15;
     -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color:transparent
+    -webkit-tap-highlight-color: transparent;
 }
 
 article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
@@ -63,7 +63,7 @@ body {
     line-height: 1.5;
     color: #ffffff;
     text-align: left;
-    background-color: #000;
+    background-color: #2d3436;
 }
 
 [tabindex="-1"]:focus:not(:focus-visible) {
@@ -201,7 +201,7 @@ table {
 caption {
     padding-top: .75rem;
     padding-bottom: .75rem;
-    color: #ffffff;
+    color: #858796;
     text-align: left;
     caption-side:bottom
 }
@@ -4422,10 +4422,10 @@ input[type=button].btn-block, input[type=reset].btn-block, input[type=submit].bt
     flex-direction: column;
     min-width: 0;
     word-wrap: break-word;
-    background-color: #000;
+    background-color: #b3b5b5;
     background-clip: border-box;
-    border: 1px solid #e3e6f0;
-    border-radius:.35rem
+    border: 1px solid #2d3436;
+    border-radius: .35rem;
 }
 
 .card > hr {
@@ -6419,7 +6419,7 @@ a.bg-dark:focus, a.bg-dark:hover, button.bg-dark:focus, button.bg-dark:hover {
 }
 
 .bg-white {
-    background-color: #000 !important;
+    background-color: #2d3436 !important;
 }
 
 .bg-transparent {
@@ -9912,9 +9912,9 @@ a:focus {
 }
 
 #wrapper #content-wrapper {
-    background-color: #000000;
+    background-color: #2d3436;
     width: 100%;
-    overflow-x:hidden
+    overflow-x: hidden;
 }
 
 #wrapper #content-wrapper #content {
