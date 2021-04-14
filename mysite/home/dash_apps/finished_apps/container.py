@@ -10,10 +10,7 @@ from datetime import date
 
 # Stores all custom graphs
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-
-
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://dl.dropboxusercontent.com/s/zbb8j15aa5ixsrf/plotly-dash.css'] #
 
 class Container:
 
@@ -25,6 +22,65 @@ class Container:
         self.div = html.Div(id="graphcontainer")
 
         self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
+        self.genre_options = [
+                    {'label': 'Any', 'value': '1'},
+                    {'label': 'Action', 'value': '2'},
+                    {'label': 'Adventure', 'value': '3'},
+                    {'label': 'Cars', 'value': '4'},
+                    {'label': 'Comedy', 'value': '5'},
+                    {'label': 'Dementia', 'value': '6'},
+                    {'label': 'Demons', 'value': '7'},
+                    {'label': 'Mystery', 'value': '8'},
+                    {'label': 'Drama', 'value': '9'},
+                    {'label': 'Ecchi', 'value': '10'},
+                    {'label': 'Fantasy', 'value': '11'},
+                    {'label': 'Game', 'value': '12'},
+                    {'label': 'Hentai', 'value': '13'},
+                    {'label': 'Historical', 'value': '14'},
+                    {'label': 'Horror', 'value': '15'},
+                    {'label': 'Kids', 'value': '16'},
+                    {'label': 'Magic', 'value': '17'},
+                    {'label': 'Martial Arts', 'value': '18'},
+                    {'label': 'Mecha', 'value': '19'},
+                    {'label': 'Music', 'value': '20'},
+                    {'label': 'Parody', 'value': '21'},
+                    {'label': 'Samurai', 'value': '22'},
+                    {'label': 'Romance', 'value': '23'},
+                    {'label': 'School', 'value': '24'},
+                    {'label': 'Sci Fi', 'value': '25'},
+                    {'label': 'Shoujo', 'value': '26'},
+                    {'label': 'Shoujo Ai', 'value': '27'},
+                    {'label': 'Shounen', 'value': '28'},
+                    {'label': 'Shounen Ai', 'value': '29'},
+                    {'label': 'Space', 'value': '30'},
+                    {'label': 'Sports', 'value': '31'},
+                    {'label': 'Super Power', 'value': '32'},
+                    {'label': 'Vampire', 'value': '33'},
+                    {'label': 'Yaoi', 'value': '34'},
+                    {'label': 'Yuri', 'value': '35'},
+                    {'label': 'Harem', 'value': '36'},
+                    {'label': 'Slice Of Life', 'value': '37'},
+                    {'label': 'Supernatural', 'value': '38'},
+                    {'label': 'Military', 'value': '39'},
+                    {'label': 'Police', 'value': '40'},
+                    {'label': 'Psychological', 'value': '41'},
+                    {'label': 'Thriller', 'value': '42'},
+                    {'label': 'Seinen', 'value': '43'},
+                    {'label': 'Josei', 'value': '44'},
+
+                ]
+
+        self.category_options = [
+                    {'label': 'Any', 'value': '1'},
+                    {'label': 'TV', 'value': '2'},
+                    {'label': 'OVA', 'value': '3'},
+                    {'label': 'Movie', 'value': '4'},
+                    {'label': 'Special', 'value': '5'},
+                    {'label': 'ONA', 'value': '6'},
+                    {'label': 'Music', 'value': '7'},
+                ]
+
+
         self.app.layout = self.serve_layout
 
         # @self.app.callback(
@@ -36,14 +92,24 @@ class Container:
             [Output('table', 'data'),
             Output('table', 'dropdown')],
             [Input('search_button', 'n_clicks'),
-            State('graphname', 'value')]
+            State('graphname', 'value'),
+            State('genre_dropdown', 'value'),
+            State('category_dropdown', 'value')]
         )
-        def update_table(n_clicks, value):
-            data = []
+        def update_table(n_clicks, graphname, genre_dropdown, category_dropdown):
+            data = [{'Name': "", 'Add Graph(s)': ""},
+                    {'Name': "", 'Add Graph(s)': ""},
+                    {'Name': "", 'Add Graph(s)': ""},
+                    {'Name': "", 'Add Graph(s)': ""},
+                    {'Name': "", 'Add Graph(s)': ""}]
             dropdown = {}
 
-            if n_clicks > 0 and value is not None:
-                results = self.search_anime(value)
+            if n_clicks > 0 and graphname is not None:
+                data = []
+                #self.search_anime_gender_birthday(1)
+                selected_genre = int(genre_dropdown) - 1
+                selected_category = self.category_options[int(category_dropdown) - 1]['label']
+                results = self.search_anime(graphname, selected_genre, selected_category)
 
                 for x in range(0, len(results)-1):
                     data.append({'Name': results[x]["title"], 'Add Graph(s)': "Don't add Graph"})
@@ -92,90 +158,41 @@ class Container:
             self.div = html.Div(children=self.init_graph(), id="graphcontainer")
 
         return html.Div([
-            dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
-            html.Button(id="search_button", n_clicks=0, children="Search"),
-            html.Br(),
-            html.Div(id='genre-dropdown',children='Genre:'),
-            dcc.Dropdown(
-                options=[
-                    {'label': 'Any', 'value': '1'},
-                    {'label': 'Action', 'value': '2'},
-                    {'label': 'Cars', 'value': '3'},
-                    {'label': 'Comedy', 'value': '4'},
-                    {'label': 'Dementia', 'value': '5'},
-                    {'label': 'Demons', 'value': '6'},
-                    {'label': 'Mystery', 'value': '7'},
-                    {'label': 'Drama', 'value': '8'},
-                    {'label': 'Ecchi', 'value': '9'},
-                    {'label': 'Fantasy', 'value': '10'},
-                    {'label': 'Game', 'value': '11'},
-                    {'label': 'Hentai', 'value': '12'},
-                    {'label': 'Historical', 'value': '13'},
-                    {'label': 'Horror', 'value': '14'},
-                    {'label': 'Kids', 'value': '15'},
-                    {'label': 'Magic', 'value': '16'},
-                    {'label': 'Martial Arts', 'value': '17'},
-                    {'label': 'Mecha', 'value': '18'},
-                    {'label': 'Music', 'value': '19'},
-                    {'label': 'Parody', 'value': '20'},
-                    {'label': 'Samurai', 'value': '21'},
-                    {'label': 'Romance', 'value': '22'},
-                    {'label': 'School', 'value': '23'},
-                    {'label': 'Sci Fi', 'value': '24'},
-                    {'label': 'Shoujo', 'value': '25'},
-                    {'label': 'Shoujo Ai', 'value': '26'},
-                    {'label': 'Shounen', 'value': '27'},
-                    {'label': 'Shounen Ai', 'value': '28'},
-                    {'label': 'Space', 'value': '29'},
-                    {'label': 'Sports', 'value': '30'},
-                    {'label': 'Super Power', 'value': '31'},
-                    {'label': 'Vampire', 'value': '32'},
-                    {'label': 'Yaoi', 'value': '33'},
-                    {'label': 'Yuri', 'value': '34'},
-                    {'label': 'Harem', 'value': '35'},
-                    {'label': 'Slice Of Life', 'value': '36'},
-                    {'label': 'Supernatural', 'value': '37'},
-                    {'label': 'Military', 'value': '38'},
-                    {'label': 'Police', 'value': '39'},
-                    {'label': 'Psychological', 'value': '40'},
-                    {'label': 'Thriller', 'value': '41'},
-                    {'label': 'Seinen', 'value': '42'},
-                    {'label': 'Josei', 'value': '43'},
+            html.Div(
+                id='searchtablearea',
+                children=[
+                html.Div(
+                    id='searcharea',
+                    children=[
+                        dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
+                        html.Button(id="search_button", n_clicks=0, children="Search"),
+                        html.P('Genre:'),
+                        dcc.Dropdown(id='genre_dropdown',
+                                     options=self.genre_options,
+                                     value='1'
+                                     ),
 
-                ],
-                value='1'
-            ),
+                        html.P('Category:'),
+                        dcc.Dropdown(id='category_dropdown',
+                                     options=self.category_options,
+                                     value='1'
+                                     ),
 
-            html.Br(),
+                        html.P('Select search range:'),
 
-            html.Div(id='category-dropdown',
-                     children='Category:'),
-
-            dcc.Dropdown(
-                options=[
-                    {'label': 'Any', 'value': '1'},
-                    {'label': 'TV', 'value': '2'},
-                    {'label': 'OVA', 'value': '3'},
-                    {'label': 'Movie', 'value': '4'},
-                    {'label': 'Special', 'value': '5'},
-                    {'label': 'ONA', 'value': '6'},
-                    {'label': 'Music', 'value': '7'},
-                ],
-                value='1'
-            ),
-            html.Br(),
-            html.Div(id='range-button',
-                     children='Select the range of data:'),
-
-            dcc.DatePickerRange(
-                id='date-picker-range',
-                start_date=date(2020, 3, 23),
-                end_date_placeholder_text='Select a date!'
-            ),
-            html.Hr(),
-            self.init_table(),
-            html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
-            
+                        dcc.DatePickerRange(
+                            id='date-picker-range',
+                            start_date=date(2020, 3, 23),
+                            end_date_placeholder_text='Select a date!'
+                        ),
+                    ]),
+                html.Div(
+                    id='tablearea',
+                    children=
+                    [self.init_table(),
+                     html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
+                ])
+            ]),
             self.div
         ])
 
@@ -193,11 +210,26 @@ class Container:
                  self.graphs_list.append(i.return_layout())
 
         return html.Div(self.graphs_list)
-        
+
+    def search_anime_gender_birthday(self, anime_id):
+        data = [sub['username'] for sub in self.jikan.anime(anime_id, extension='userupdates', page=1)["users"]]
+        user = [self.jikan.user(username=name) for name in data]
+        print(name['birthday'] for name in user)
+        print(name['gender'] for name in user)
 
 
-    def search_anime(self, anime_name):
-        search = self.jikan.search('anime', anime_name)
+
+    def search_anime(self, anime_name, genre_number, category_name):
+        search_params = {}
+
+        if genre_number > 0:
+            search_params['genre'] = genre_number
+
+        if category_name != "Any":
+            search_params['type'] = category_name
+
+        search = self.jikan.search('anime', anime_name, parameters=search_params)
+
         #user = self.jikan.user_list(38000)
         #print(user)
         #print(user['birthday'])
@@ -209,11 +241,7 @@ class Container:
         layout = dash_table.DataTable(
             id='table',
             columns=[{"name": "Name", "id": "Name"}, {"name": type+' Graph(s)', "id": type+' Graph(s)', "presentation": "dropdown"}],
-            data=[{'Name': "", type+' Graph(s)': ""},
-                  {'Name': "", type+' Graph(s)': ""},
-                  {'Name': "", type+' Graph(s)': ""},
-                  {'Name': "", type+' Graph(s)': ""},
-                  {'Name': "", type+' Graph(s)': ""}],
+            data=[],
             page_size=pg_size,
             editable=True,
             #row_deletable=True,
