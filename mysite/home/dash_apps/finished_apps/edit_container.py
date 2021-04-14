@@ -54,7 +54,7 @@ class Edit_Container:
             self.table = self.init_table('Remove', 5)
 
         return html.Div([
-                html.H1("Edit Page"),
+                html.H1("Settings"),
                 self.table,
                 html.Button('Remove Selected Graphs', id="remove_graphs", n_clicks=0)
         ])

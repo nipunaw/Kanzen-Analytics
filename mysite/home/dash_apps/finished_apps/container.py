@@ -184,6 +184,8 @@ class Container:
                             id='date-picker-range',
                             start_date=date(2020, 3, 23),
                             end_date_placeholder_text='Select a date!'
+
+
                         ),
                     ]),
                 html.Div(
@@ -192,7 +194,9 @@ class Container:
                     [self.init_table(),
                      html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
                 ])
+
             ]),
+            html.Hr(),
             self.div
         ])
 

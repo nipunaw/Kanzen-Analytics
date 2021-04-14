@@ -52,7 +52,7 @@ class Export_Container:
            self.table = self.init_table('Export', 5)
 
         return html.Div([
-            html.H1("Export Page"),
+            html.H1("Export"),
             self.table,
             html.Button('Export Selected Graphs', id="export_graphs", n_clicks=0),
         ])
