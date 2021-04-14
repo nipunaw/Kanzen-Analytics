@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 from django_plotly_dash import DjangoDash
 from home.models import Anime
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://dl.dropboxusercontent.com/s/zbb8j15aa5ixsrf/plotly-dash.css']
 
 class Edit_Container:
 

@@ -103,8 +103,6 @@ class Graphs:
         time.sleep(0.5)
         return search["results"][0]["title"]
 
-
-
     def return_graph(self):
         trendshow = TrendReq(hl='en-US', tz=360)
 
@@ -140,6 +138,8 @@ class Graphs:
         }
 
         return dcc.Graph(id=self.graph_id, figure=fig)
+
+
 
     def return_layout(self):
         return self.app.layout
