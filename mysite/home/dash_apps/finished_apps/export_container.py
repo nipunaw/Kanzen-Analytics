@@ -63,7 +63,7 @@ class Export_Container:
     def init_data(self):
         data = []
         self.graphs_list = []
-        for a in Anime.objects.raw('SELECT * FROM home_anime'):
+        for a in Anime.objects.raw('SELECT anime_name FROM home_anime ORDER BY anime_order ASC'):
             p = str(a)
             self.graphs_list.append(p)
         for title in self.graphs_list:

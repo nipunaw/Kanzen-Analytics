@@ -64,11 +64,12 @@ class Container:
             id = 'graph-{}'.format(n_clicks)
 
             names_to_query = []
-
+            num_graphs = Anime.objects.count()
             for i in data:
                 if i['Add Graph(s)'] == 'Add Graph':
+                    num_graphs = num_graphs+1
                     names_to_query.append(i['Name'])
-                    a = Anime(anime_name=i['Name'])
+                    a = Anime(anime_name=i['Name'],anime_order=num_graphs)
                     a.save()
 
             if n_clicks > 0 and len(names_to_query) > 0:
@@ -79,7 +80,11 @@ class Container:
                                         [Input(i + 'slider', 'value')], i)
 
                     self.graphs_list.append(test.return_layout())  # dcc.Graph(id='graph-{}'.format(n_clicks), figure=test.return_fig())
-            
+            if self.shared_info.pending_updates_main:
+                self.shared_info.pending_updates_main = False
+                self.div = html.Div(children=self.init_graph(), id="graphcontainer")
+                return self.div
+ 
             return html.Div(self.graphs_list)
 
     def serve_layout(self):
@@ -98,7 +103,7 @@ class Container:
     def init_graph(self):
         initial_graphs = []
         self.graphs_list = []
-        for a in Anime.objects.raw('SELECT * FROM home_anime'):
+        for a in Anime.objects.raw('SELECT anime_name FROM home_anime ORDER BY anime_order ASC'):
             p = str(a)
 
             initial_graphs.append(graphs.Graphs(p.replace(" ", ""), p, p.replace(" ", ""), p.replace(" ", "") + 'slider', False,
