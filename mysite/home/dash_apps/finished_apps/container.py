@@ -10,7 +10,7 @@ from datetime import date
 
 # Stores all custom graphs
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://dl.dropboxusercontent.com/s/zbb8j15aa5ixsrf/plotly-dash.css'] #
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://www.dl.dropboxusercontent.com/s/99knran9jmm5beo/plotly-dash.css'] #
 
 class Container:
 
