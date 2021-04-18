@@ -6,6 +6,7 @@ from django_plotly_dash import DjangoDash
 from jikanpy import Jikan
 from pytrends.request import TrendReq
 import pandas as pd
+import time
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -94,13 +95,13 @@ class Graphs:
 
     def get_top_anime_names(self, rank: int, subtype: str):
         top_anime = self.jikan.top(type='anime', page=1, subtype=subtype)
+        time.sleep(0.5)
         return top_anime["top"][rank]["title"]
 
     def search_anime(self, anime_name):
         search = self.jikan.search('anime', anime_name)
+        time.sleep(0.5)
         return search["results"][0]["title"]
-
-
 
     def return_graph(self):
         trendshow = TrendReq(hl='en-US', tz=360)
@@ -137,6 +138,8 @@ class Graphs:
         }
 
         return dcc.Graph(id=self.graph_id, figure=fig)
+
+
 
     def return_layout(self):
         return self.app.layout
