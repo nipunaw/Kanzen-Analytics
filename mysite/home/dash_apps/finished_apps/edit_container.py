@@ -20,13 +20,15 @@ class Edit_Container:
         @self.app.callback(
             [Output('table', 'data'),
             Output('table', 'dropdown'),
+            Output('hidden_div','style')
             ],
             [Input('remove_graphs','n_clicks'),
             State('table', 'data')])
         def remove_graphs(n_clicks,value):
-            #Begin new reorder code
             options = []
             dropdown = {}
+            #old_index = []
+            #save old index's
             for i in range(1,len(value)+1):
                 options.append({'label':i,'value':i})
             # Setup remove data
@@ -47,6 +49,7 @@ class Edit_Container:
             if n_clicks > 0:
                 self.shared_info.pending_updates_main = True
                 self.shared_info.pending_updates_export = True
+
                 for i in value:
                     #print(i['Order'])
                     if i['Remove Graph(s)'] == 'Remove Graph':
@@ -63,6 +66,7 @@ class Edit_Container:
                             element.save()
                         a.delete()
                 # remove elements then reorder to prevent any issues
+                
                 for i in value:
                     already_removed = False
                     temp = None
@@ -71,47 +75,24 @@ class Edit_Container:
                     except:
                         already_removed = True
                     if  already_removed == False:
+                    
                         if temp.anime_order != i['Order']:
                             temp.anime_order = i['Order']
                             temp.save()
-
-            for a in Anime.objects.raw('SELECT * FROM home_anime ORDER BY anime_order ASC'):
-                    data.append({'Name':a.anime_name,'Remove Graph(s)':"Don't remove Graph",'Order':a.anime_order})
+            div_style ={'display':'none'}
+            # check if any order values are repeated
             
-            return data, dropdown#, reorder_data, reorder_dropdown
-        '''@self.app.callback(
-            [Output('reorder_table','data'),
-            Output('reorder_table','dropdown')],
-            [Input('reorder_btn','n_clicks'),
-            State('reorder_table','data'),
-            State('table','data')]
-        )
-        def reorder_graphs(n_clicks,reorder_values,remove_table):
-            self.shared_info.pending_updates_main = True
-            self.shared_info.pending_updates_export = True
-
-            options = []
-            anime_objects = Anime.objects.raw('SELECT * FROM home_anime ORDER BY anime_order ASC')
-            for i in range(1,len(remove_table)+1):
-                options.append({'label':i,'value':i})
-            dropdown = {
-                'Order':{
-                    'options':options
-                }
-            }
+            for a in Anime.objects.all():
+                #print(len(Anime.objects.filter(anime_order = a.anime_order)))
+                if len(Anime.objects.filter(anime_order = a.anime_order)) > 1:
+                    div_style = {'display': 'block'}
+                    
+           
+            for a in Anime.objects.raw('SELECT * FROM home_anime ORDER BY anime_order ASC'): 
+                data.append({'Name':a.anime_name,'Remove Graph(s)':"Don't remove Graph",'Order':a.anime_order})
             
-            # get dropdown selections, edit database
-            for i in reorder_values:
-                temp = Anime.objects.get(anime_name = i['Name'])
-
-                if temp.anime_order != i['Order']:
-                    temp.anime_order = i['Order']
-                    temp.save()
-
-            data = []
-            for a in Anime.objects.raw('SELECT * FROM home_anime ORDER BY anime_order ASC'):
-                data.append({'Name':a.anime_name,'Order':a.anime_order})
-            return data,dropdown'''
+            return data, dropdown, div_style#, reorder_data, reorder_dropdown
+        
     def serve_layout(self):
         if self.shared_info.pending_updates_edit:
             self.shared_info.pending_updates_edit = False
@@ -122,6 +103,7 @@ class Edit_Container:
                 html.H1("Edit Page"),
                 self.table,
                 html.Button('Submit Changes', id="remove_graphs", n_clicks=0),
+                html.Div([html.H2('Invalid Input: 2 or more elements have the same order',style={'color':'red'})],id='hidden_div',style={'display':'none'},)
                 #self.reorder_table,
                 #html.Button('Reorder Graphs', id="reorder_btn", n_clicks=0),
         ])
@@ -148,6 +130,8 @@ class Edit_Container:
         for title in self.graphs_list:
             data.append({'Name': title, 'Remove Graph(s)': "Don't remove Graph"})
         return data
+    
+        
     '''def init_reorder_table(self):
         layout = dash_table.DataTable(
             id='reorder_table',
