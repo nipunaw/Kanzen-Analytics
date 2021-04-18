@@ -37,7 +37,7 @@ class Export_Container:
            self.table = self.init_table('Export', 5)
 
         return html.Div([
-            html.H1("Export Page"),
+            html.H1("Export Data"),
             self.table,
             #html.A('Download CSV', id='my_link',n_clicks=0,href=''),
             #Download(id='download')
@@ -49,12 +49,28 @@ class Export_Container:
         
         layout = dash_table.DataTable(
             id='table',
+            style_cell={'textAlign': 'left'},
+            style_data_conditional=[
+                {
+                    "if": {"state": "active"},  # 'active' | 'selected'
+                    "backgroundColor": "#FFFFFF",
+                    "border": "1px solid #3CCFCF",
+                },
+                {
+                    "if": {"state": "selected"},
+                    "backgroundColor": "##FFFFFF",
+                    "border": "1px solid #3CCFCF",
+                },
+            ],
+            style_header={
+                'backgroundColor': 'rgb(230, 230, 230)',
+                'fontWeight': 'bold'
+            },
             data=self.trend_data.to_dict('records'),
             columns=[{"name": i,"id":i}for i in self.trend_data.columns],
             page_size=50,
-            editable=True,
+            editable=False,
             export_format='csv',
-            #row_deletable=True,
         )
 
         return layout

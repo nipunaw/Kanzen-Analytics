@@ -3,7 +3,7 @@
 {% block content %}
     {% load plotly_dash %}
 
-<div class="{% plotly_class name='edit_container' %} card" style="height: 100%; width: 50%">
-        {% plotly_app name='edit_container' ratio=0.45 %}
+<div class="{% plotly_class name='edit_container' %} card" style="height: 100%; width: 50%; min-height: 800px;">
+        {% plotly_app name='edit_container' ratio=1.0 %}
     </div>
 {% endblock %}

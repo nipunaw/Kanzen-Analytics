@@ -7,4 +7,3 @@ class Anime(models.Model):
     anime_order = models.IntegerField(unique=False,default=0)
     def __str__(self):
         return self.anime_name
-
