@@ -120,7 +120,7 @@ class Edit_Container:
                 self.shared_info.time_scale = time_scale
                 self.shared_info.pending_updates_main = True
 
-            return data, dropdown#, reorder_data, reorder_dropdown
+            return data, dropdown, div_style#, reorder_data, reorder_dropdown
         
         
     def serve_layout(self):
@@ -139,7 +139,8 @@ class Edit_Container:
                                       {'label': 'Green', 'value': 'Green'},
                                       {'label': 'Orange', 'value': 'Orange'}],
                              value=self.shared_info.color_graphs,
-                             clearable=False
+                             clearable=False,
+                             searchable=False
                              ),
                 html.P('Graph time range:'),
                 dcc.Dropdown(id='time_range_dropdown',
@@ -148,7 +149,8 @@ class Edit_Container:
                                   {'label': '1 Year', 'value': '12-m'},
                                   {'label': '5 Years', 'value': '5-y'}],
                          value=self.shared_info.time_scale,
-                         clearable=False
+                         clearable=False,
+                         searchable=False
                          ),
                 html.Button('Submit Changes', id="remove_graphs", n_clicks=0),
                 html.Div([html.H2('Invalid Input: 2 or more elements have the same order',style={'color':'red'})],id='hidden_div',style={'display':'none'},)

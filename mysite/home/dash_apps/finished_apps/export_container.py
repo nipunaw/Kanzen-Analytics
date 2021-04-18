@@ -41,6 +41,7 @@ class Export_Container:
 
         return html.Div([
             html.H1("Export Data"),
+            html.P("Export time range: "),
             dcc.Dropdown(
                 id = 'range_selector',
                 options=[
@@ -49,6 +50,8 @@ class Export_Container:
                     {'label':'3 Months','value':'today 3-m'},
                     {'label':'1 Month','value':'today 1-m'},
                 ],
+                clearable=False,
+                searchable=False,
                 value='today 5-y'
             ),
             html.Button('Load Data', id='load_data',n_clicks=0),
