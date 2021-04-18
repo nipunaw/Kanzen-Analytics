@@ -1,4 +1,5 @@
 import dash_html_components as html
+import dash_core_components as dcc
 import dash_table
 from dash.dependencies import Input, Output, State
 from django_plotly_dash import DjangoDash
@@ -21,10 +22,12 @@ class Export_Container:
         @self.app.callback(
             [Output('table','data'),
             Output('table','columns')],
-            [Input('table','data')]
+            [Input('load_data','n_clicks'),
+            State('range_selector','value') ],
+            #prevent_initial_call=True
         )
-        def update_table(value):
-            self.init_data()
+        def update_table(n_clicks,value):
+            self.init_data(value)
             table_data = self.trend_data.to_dict('records')
             table_cols = [{"name": i,"id":i}for i in self.trend_data.columns]
             return table_data, table_cols
@@ -38,6 +41,17 @@ class Export_Container:
 
         return html.Div([
             html.H1("Export Data"),
+            dcc.Dropdown(
+                id = 'range_selector',
+                options=[
+                    {'label':'5 Years','value':'today 5-y'},
+                    {'label':'1 Year','value':'today 12-m'},
+                    {'label':'3 Months','value':'today 3-m'},
+                    {'label':'1 Month','value':'today 1-m'},
+                ],
+                value='today 5-y'
+            ),
+            html.Button('Load Data', id='load_data',n_clicks=0),
             self.table,
             #html.A('Download CSV', id='my_link',n_clicks=0,href=''),
             #Download(id='download')
@@ -75,7 +89,7 @@ class Export_Container:
 
         return layout
 
-    def init_data(self):
+    def init_data(self, time_selection='today 5-y'):
         data = []
         self.graphs_list = []
         for a in Anime.objects.raw('SELECT anime_name FROM home_anime ORDER BY anime_order ASC'):
@@ -89,7 +103,7 @@ class Export_Container:
         dic = {}
         i = 0
         for kw in kw_grplist:
-            trendshow.build_payload(kw, timeframe='today 5-y', geo='')
+            trendshow.build_payload(kw, timeframe=time_selection, geo='')
             dic[i] = trendshow.interest_over_time()
             i += 1
         if len(dic) > 0:
