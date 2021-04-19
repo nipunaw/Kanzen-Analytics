@@ -12,7 +12,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 
 class Graphs:
-    def __init__(self, app_name, graph_title, graph_id, slider_id, top_bool, app_input_state_list,
+    def __init__(self, app_name, graph_title, graph_id, slider_id, top_bool, app_input_state_list, graph_color='Crimson', time_scale='12-m',
                  anime_name="default"):
         self.jikan = Jikan()
         self.app_name = app_name
@@ -21,6 +21,8 @@ class Graphs:
         self.slider_id = slider_id
         self.top_bool = top_bool
         self.app_input_state_list = app_input_state_list
+        self.graph_color = graph_color
+        self.time_scale = time_scale
         self.anime_name = anime_name
         self.app = DjangoDash(app_name, external_stylesheets=external_stylesheets)
         self.app.layout = html.Div([
@@ -70,7 +72,7 @@ class Graphs:
             dic = {}
             i = 0
             for kw in kw_grplist:
-                trendshow.build_payload(kw, timeframe='today 12-m', geo='')
+                trendshow.build_payload(kw, timeframe='today 1-w', geo='')
                 dic[i] = trendshow.interest_over_time()
                 i += 1
 
@@ -117,7 +119,7 @@ class Graphs:
         dic = {}
         i = 0
         for kw in kw_grplist:
-            trendshow.build_payload(kw, timeframe='today 12-m', geo='')
+            trendshow.build_payload(kw, timeframe='today '+self.time_scale, geo='')
             dic[i] = trendshow.interest_over_time()
             i += 1
 
@@ -128,8 +130,9 @@ class Graphs:
         fig = {
             'data': [go.Scatter(
                 x=trendframe.index,
-                y=trendframe[col], name=col) for col in trendframe.columns],
+                y=trendframe[col], name=col, line=dict(color=self.graph_color)) for col in trendframe.columns],
             'layout': dict(
+                #legend=dict(font=dict(color='#7f7f7f')),
                 paper_bgcolor='#27293d',
                 plot_bgcolor='rgba(0,0,0,0)',
                 font=dict(color='white'),

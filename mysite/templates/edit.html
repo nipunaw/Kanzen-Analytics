@@ -12,6 +12,7 @@
     <meta name="author" content="">
 
     <title>Edit</title>
+    <link rel="shortcut icon" href="{%  static 'img/KanzenLogo.png' %}">
 
     <!-- Custom fonts for this template-->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -111,11 +112,16 @@
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
 
     <!-- Page level plugins -->
-    <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
+    <!-- <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script> -->
 
     <!-- Page level custom scripts -->
-    <script src="{% static 'js/demo/chart-area-demo.js' %}"></script>
-    <script src="{% static 'js/demo/chart-pie-demo.js' %}"></script>
+    <!-- <script src="{% static 'js/demo/chart-area-demo.js' %}"></script> -->
+    <!-- <script src="{% static 'js/demo/chart-pie-demo.js' %}"></script> -->
+
+    <!-- My custom additions -->
+    <script>
+        document.getElementById('edit-menu-item').classList.add('active');
+    </script>
 
 </body>
 

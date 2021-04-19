@@ -6,20 +6,23 @@ from django_plotly_dash import DjangoDash
 from jikanpy import Jikan
 from home.dash_apps.finished_apps import graphs
 from home.models import Anime
-from datetime import date
 
 # Stores all custom graphs
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://dl.dropboxusercontent.com/s/zbb8j15aa5ixsrf/plotly-dash.css'] #
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'https://www.dl.dropboxusercontent.com/s/99knran9jmm5beo/plotly-dash.css'] #
 
 class Container:
 
     def __init__(self, id:str, shared_info):
         self.shared_info = shared_info
         self.shared_info.pending_updates_main = True
+        self.names_list = []
         self.graphs_list = []
         self.jikan = Jikan()
         self.div = html.Div(id="graphcontainer")
+
+        self.status_children = "Status: No issues. Feel free to add graphs"
+        self.add_graphs_disabled = False
 
         self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
         self.genre_options = [
@@ -86,17 +89,21 @@ class Container:
         # @self.app.callback(
         #     Output('graphcontainer', 'children'),
         #     [Input('search_button', 'n_clicks'),
-        #      State('graphname', 'value')]
+        #      State('searchname', 'value')]
         # )
         @self.app.callback(
             [Output('table', 'data'),
             Output('table', 'dropdown')],
             [Input('search_button', 'n_clicks'),
-            State('graphname', 'value'),
+            #Input("searchname", "value"),
+            Input("searchname", 'n_submit'),
+            State("searchname", "value"),
             State('genre_dropdown', 'value'),
-            State('category_dropdown', 'value')]
+            State('category_dropdown', 'value'),
+            State('date_picker_range', 'start_date'),
+            State('date_picker_range', 'end_date')]
         )
-        def update_table(n_clicks, graphname, genre_dropdown, category_dropdown):
+        def update_table(n_clicks, n_submit, searchname, genre_dropdown, category_dropdown, start_date, end_date):
             data = [{'Name': "", 'Add Graph(s)': ""},
                     {'Name': "", 'Add Graph(s)': ""},
                     {'Name': "", 'Add Graph(s)': ""},
@@ -104,12 +111,12 @@ class Container:
                     {'Name': "", 'Add Graph(s)': ""}]
             dropdown = {}
 
-            if n_clicks > 0 and graphname is not None:
+            if searchname is not None:
                 data = []
                 #self.search_anime_gender_birthday(1)
                 selected_genre = int(genre_dropdown) - 1
-                selected_category = self.category_options[int(category_dropdown) - 1]['label']
-                results = self.search_anime(graphname, selected_genre, selected_category)
+                selected_category = (self.category_options[int(category_dropdown) - 1]['label'])
+                results = self.search_anime(searchname, selected_genre, selected_category, start_date, end_date)
 
                 for x in range(0, len(results)-1):
                     data.append({'Name': results[x]["title"], 'Add Graph(s)': "Don't add Graph"})
@@ -117,45 +124,78 @@ class Container:
                 dropdown = {
                     'Add Graph(s)': {
                         'options': [
-                            {'label': "Don't add Graph", 'value': "Don't add Graph"},
-                            {'label': "Add Graph", 'value': "Add Graph"}
-                        ]
+                            {'label': "No", 'value': "Don't add Graph"},
+                            {'label': "Yes", 'value': "Add Graph"}
+                        ],
+                        'searchable': False,
+                        'clearable': False
                     }
                 }
-
+            
             return data, dropdown
 
         @self.app.callback(
-            Output('graphcontainer', 'children'),
+            [Output('graphcontainer', 'children'),
+            Output('status_message', 'children'),
+            Output('add_graphs', 'disabled')],
             [Input('add_graphs', 'n_clicks'),
             State('table', 'data')]
         )
         def add_graph(n_clicks, data):
             id = 'graph-{}'.format(n_clicks)
 
-            names_to_query = []
+            disable_add_button = self.add_graphs_disabled
+            children = self.status_children
+            flag_duplicates = False
 
+            names_to_query = []
+            num_graphs = Anime.objects.count()
             for i in data:
-                if i['Add Graph(s)'] == 'Add Graph':
-                    names_to_query.append(i['Name'])
-                    a = Anime(anime_name=i['Name'])
-                    a.save()
+                if i['Add Graph(s)'] == 'Add Graph' and num_graphs < 5:
+                    if i['Name'] not in self.names_list:
+                        num_graphs = num_graphs + 1
+                        self.names_list.append(i['Name'])
+                        names_to_query.append(i['Name'])
+                        a = Anime(anime_name=i['Name'], anime_order=num_graphs)
+                        a.save()
+                        children = "Status: Graph(s) added successfully. "+str(num_graphs)+"/5 in total."
+                    else:
+                        flag_duplicates = True
+                        children = "Status: Duplicate entries were detected; only non-duplicates (if any) were added."
+                elif num_graphs >= 5:
+                    disable_add_button = True
+                    children = "Status: Max graphs (5) limit reached. Graphs may be removed via 'Settings' page."
+                    if flag_duplicates:
+                        children = "Status: Max graphs (5) limit reached. Duplicates that were detected were not added."
 
             if n_clicks > 0 and len(names_to_query) > 0:
                 self.shared_info.pending_updates_edit = True
                 self.shared_info.pending_updates_export = True
                 for i in names_to_query:
-                    test = graphs.Graphs(i + 'app', i + ' Graph', i, i + 'slider', False,
-                                        [Input(i + 'slider', 'value')], i)
+                    test = graphs.Graphs(i + 'app', i, i, i + 'slider', False,
+                                        [Input(i + 'slider', 'value')], self.shared_info.color_graphs, self.shared_info.time_scale, i)
 
                     self.graphs_list.append(test.return_layout())  # dcc.Graph(id='graph-{}'.format(n_clicks), figure=test.return_fig())
-
-            return html.Div(self.graphs_list)
+            if self.shared_info.pending_updates_main:
+                self.shared_info.pending_updates_main = False
+                self.div = html.Div(children=self.init_graph(), id="graphcontainer")
+                return self.div, children, disable_add_button
+ 
+            return html.Div(self.graphs_list), children, disable_add_button
 
     def serve_layout(self):
         if self.shared_info.pending_updates_main:
             self.shared_info.pending_updates_main = False
             self.div = html.Div(children=self.init_graph(), id="graphcontainer")
+
+        num_graphs = Anime.objects.count()
+
+        if num_graphs == 5:
+            self.status_children = "Status: Max graphs (5) limit reached. Graphs may be removed via 'Settings' page."
+            self.add_graphs_disabled = True
+        else:
+            self.status_children = "Status: No issues. Feel free to add graphs ("+str(num_graphs)+"/5 total limit)"
+            self.add_graphs_disabled = False
 
         return html.Div([
             html.Div(
@@ -164,35 +204,43 @@ class Container:
                 html.Div(
                     id='searcharea',
                     children=[
-                        dcc.Input(id='graphname', type='text', placeholder='Enter Show Name'),
+                        dcc.Input(
+                            id='searchname',
+                            type='text',
+                            placeholder='Enter Show Name',
+                            debounce=True,
+                            n_submit=0
+                        ),
                         html.Button(id="search_button", n_clicks=0, children="Search"),
                         html.P('Genre:'),
                         dcc.Dropdown(id='genre_dropdown',
                                      options=self.genre_options,
-                                     value='1'
+                                     value='1',
+                                     clearable=False
                                      ),
 
                         html.P('Category:'),
                         dcc.Dropdown(id='category_dropdown',
                                      options=self.category_options,
-                                     value='1'
+                                     value='1',
+                                     clearable=False
                                      ),
 
                         html.P('Select search range:'),
 
                         dcc.DatePickerRange(
-                            id='date-picker-range',
-                            start_date=date(2020, 3, 23),
-                            end_date_placeholder_text='Select a date!'
-
-
+                            id='date_picker_range',
+                            start_date_placeholder_text='Select start date',
+                            end_date_placeholder_text='Select end date',
+                            clearable=True,
                         ),
                     ]),
                 html.Div(
                     id='tablearea',
                     children=
                     [self.init_table(),
-                     html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs"),
+                     html.P(id='status_message', children=self.status_children),
+                     html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs", disabled=self.add_graphs_disabled),
                 ])
 
             ]),
@@ -203,11 +251,12 @@ class Container:
     def init_graph(self):
         initial_graphs = []
         self.graphs_list = []
-        for a in Anime.objects.raw('SELECT * FROM home_anime'):
+        self.names_list = []
+        for a in Anime.objects.raw('SELECT anime_name FROM home_anime ORDER BY anime_order ASC'):
             p = str(a)
-
+            self.names_list.append(p)
             initial_graphs.append(graphs.Graphs(p.replace(" ", ""), p, p.replace(" ", ""), p.replace(" ", "") + 'slider', False,
-                               [Input(p.replace(" ", "") + 'slider', 'value')], p))
+                               [Input(p.replace(" ", "") + 'slider', 'value')], self.shared_info.color_graphs, self.shared_info.time_scale, p))
 
         if len(initial_graphs) != 0:
              for i in initial_graphs:
@@ -223,7 +272,7 @@ class Container:
 
 
 
-    def search_anime(self, anime_name, genre_number, category_name):
+    def search_anime(self, anime_name, genre_number, category_name, start_date, end_date):
         search_params = {}
 
         if genre_number > 0:
@@ -231,6 +280,12 @@ class Container:
 
         if category_name != "Any":
             search_params['type'] = category_name
+
+        if start_date is not None:
+            search_params['start_date'] = start_date
+
+        if end_date is not None:
+            search_params['end_date'] = end_date
 
         search = self.jikan.search('anime', anime_name, parameters=search_params)
 
@@ -244,11 +299,35 @@ class Container:
     def init_table(self, type:str='Add', pg_size:int=5):
         layout = dash_table.DataTable(
             id='table',
-            columns=[{"name": "Name", "id": "Name"}, {"name": type+' Graph(s)', "id": type+' Graph(s)', "presentation": "dropdown"}],
+            style_cell={'textAlign': 'left'},
+            style_data_conditional=[
+                {
+                    "if": {"state": "active"},  # 'active' | 'selected'
+                    "backgroundColor": "#FFFFFF",
+                    "border": "1px solid #3CCFCF",
+                },
+                {
+                    "if": {"state": "selected"},
+                    "backgroundColor": "##FFFFFF",
+                    "border": "1px solid #3CCFCF",
+                },
+            ],
+            style_header={
+                'backgroundColor': 'rgb(230, 230, 230)',
+                'fontWeight': 'bold'
+            },
+            columns=[{"name": "Name",
+                      "id": "Name",
+                      "editable": False
+                      },
+                     {"name": type+' Graph(s)',
+                      "id": type+' Graph(s)',
+                      "presentation": "dropdown",
+                      "editable": True,
+                      }
+            ],
             data=[],
             page_size=pg_size,
-            editable=True,
-            #row_deletable=True,
         )
 
         return layout
