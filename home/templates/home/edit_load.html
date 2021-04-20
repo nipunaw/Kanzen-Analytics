@@ -1,0 +1,9 @@
+{% extends 'edit.html' %}
+{% load static %}
+{% block content %}
+    {% load plotly_dash %}
+
+<div class="{% plotly_class name='edit_container' %} card" style="height: 100%; width: 50%; min-height: 800px;">
+        {% plotly_app name='edit_container' ratio=1.0 %}
+    </div>
+{% endblock %}

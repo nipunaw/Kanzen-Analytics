@@ -1,24 +1,24 @@
 version: 2.1
+
 orbs:
-  node: circleci/node@4.1.0
+  python: circleci/python@0.2.1
 
 jobs:
-  build:
-    executor: 
-      name: node/default
-      tag: '14.5'
+  build-and-test:
+    executor: python/default
     steps:
       - checkout
-      - node/install-packages:
-          cache-path: ~/project/testing/node_modules
-          app-dir: ~/project/testing
-          override-ci-command: npm install
-      - run: 
-          command: npm start
-          working_directory: ~/project/testing
-          background: true
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
       - run:
-          sleep 5
-      - run:
-          command: npx mocha server.test.js
-          working_directory: ~/project/testing
+          command: |
+           ls -al manage.py
+           sudo chmod +x ./manage.py
+           ./manage.py test
+          name: Test
+
+workflows:
+  main:
+    jobs:
+      - build-and-test

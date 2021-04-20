@@ -1,0 +1,8 @@
+{% extends 'export.html' %}
+{% load static %}
+{% block content %}
+    {% load plotly_dash %}
+<div class="{% plotly_class name='export_container' %} card" style=" height: 100%;width: 100%">
+        {% plotly_app name='export_container' ratio=0.45 %}
+</div>
+{% endblock %}

@@ -1,4 +1,6 @@
 .vscode/
 .idea/
-venv/
-/mysite/static/
+/venv
+/static
+/home/migrations
+*.pyc
