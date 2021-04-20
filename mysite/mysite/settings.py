@@ -26,7 +26,10 @@ SECRET_KEY = '#cztue-04&(&za20ven+c1kkz^+kn5*mua-4hx4a!wz!l58e*9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'kanzenanalytics.herokuapp.com',
+    '127.0.0.1'
+]
 
 
 # Application definition
@@ -52,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -88,10 +92,11 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'kanzen',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'localhost'
+        'NAME': 'd4p4ts4hglf52f',
+        'HOST': 'ec2-107-22-83-3.compute-1.amazonaws.com',
+        'PORT': 5432,
+        'USER': 'bfqnzvrhszvmlv',
+        'PASSWORD': 'f1aefd755d0600ca281b0e8c0854e1d710f5f8f7e29489d70773c5775722980b',
     }
 }
 
