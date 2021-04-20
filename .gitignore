@@ -1,5 +1,6 @@
 .vscode/
 .idea/
 venv/
-mysite/home/migrations/
+/static/
+/home/migrations/
 *.pyc
