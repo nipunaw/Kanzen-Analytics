@@ -15,6 +15,7 @@ jobs:
       - run:
           command: |
            ls -al manage.py
+           sudo chmod +x ./manage.py
            ./manage.py test
           name: Test
 
