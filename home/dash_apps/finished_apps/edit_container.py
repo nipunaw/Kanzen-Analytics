@@ -17,117 +17,84 @@ class Edit_Container:
         self.graphs_list = []
         self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
         self.table = dash_table.DataTable()
-        #self.reorder_table = dash_table.DataTable()
+        self.status_default = "Status: No changes made yet; feel free to update settings."
         self.app.layout = self.serve_layout
+        self.start_data = []
 
         @self.app.callback(
             [Output('table', 'data'),
-            Output('table', 'dropdown'),
-            Output('hidden_div','style')
-            ],
-            [Input('remove_graphs','n_clicks'),
+             Output('table', 'dropdown'),
+             Output('status_message', 'children')],
+            [Input('remove_graphs', 'n_clicks'),
              State('line_color_dropdown', 'value'),
              State('time_range_dropdown', 'value'),
              State('table', 'data')])
         def remove_graphs(n_clicks, line_color, time_scale, value):
-            options = []
-            dropdown = {}
-            #old_index = []
-            #save old index's
-            for i in range(1,len(value)+1):
-                options.append({'label':str(i)+"⠀⠀",'value':i})
-            # Setup remove data
-            data = []
-            dropdown = {
-                    'Remove Graph(s)': {
-                        'options': [
-                            {'label': "No", 'value': "Don't remove Graph"},
-                            {'label': "Yes", 'value': "Remove Graph"}
-                        ],
-                        'clearable': False,
-                        'searchable': False
-                    },
-                    'Order': {
-                        'options': options,
-                        'clearable': False,
-                        'searchable': False
-                    }
-                } 
-            
-            graphs_to_remove = []
-            if n_clicks > 0:
+
+            # Reset table data
+            graphs_to_keep = []
+            order_to_keep = []
+            children = self.status_default
+
+            if n_clicks > 0 and (value != self.start_data or line_color != self.shared_info.color_graphs or time_scale != self.shared_info.time_scale):
                 self.shared_info.pending_updates_main = True
-                self.shared_info.pending_updates_export = True
+
+                if value != self.start_data:
+                    self.shared_info.pending_updates_export = True
 
                 for i in value:
-                    #print(i['Order'])
                     if i['Remove Graph(s)'] == 'Remove Graph':
-                        graphs_to_remove.append(i['Name'])
-                for name in graphs_to_remove:
-                        self.graphs_list.remove(name)
-                        a = Anime.objects.get(anime_name = name)
-                        b = Anime.objects.all().filter(anime_order__gt=a.anime_order)
-                        for element in b:
-                            element.anime_order = element.anime_order-1
-                            for i in value:
-                                if i['Name'] == element.anime_name:
-                                    i['Order'] = i['Order'] - 1
-                            element.save()
-                        a.delete()
-                # remove elements then reorder to prevent any issues
-                
-                for i in value:
-                    already_removed = False
-                    temp = None
-                    try:
-                        temp = Anime.objects.get(anime_name = i['Name'])
-                    except:
-                        already_removed = True
-                    if  already_removed == False:
-                    
-                        if temp.anime_order != i['Order']:
-                            temp.anime_order = i['Order']
-                            temp.save()
+                        pass
+                    else:
+                        graphs_to_keep.append(i['Name'])
+                        order_to_keep.append(int(i['Order']))
 
-            div_style ={'display':'none'}
-            # check if any order values are repeated
-            
-            for a in Anime.objects.all():
-                #print(len(Anime.objects.filter(anime_order = a.anime_order)))
-                if len(Anime.objects.filter(anime_order = a.anime_order)) > 1:
-                    div_style = {'display': 'block'}
-            
-            for a in Anime.objects.raw('SELECT * FROM home_anime ORDER BY anime_order ASC'):
-                    data.append({'Name': a.anime_name, 'Remove Graph(s)': "Don't remove Graph", 'Order':a.anime_order})
+                sorted_graphs_to_keep = [x for _, x in sorted(zip(order_to_keep, graphs_to_keep), key=lambda pair: pair[0])]
+                Anime.objects.all().delete()
 
-            if line_color is not self.shared_info.color_graphs:
-                config = configparser.ConfigParser()
-                path = os.path.join(os.path.dirname(__file__), 'config.ini')
-                config.read(path)
-                config['SETTINGS']['color'] = line_color
-                with open(path, 'w') as configfile:
-                    config.write(configfile)
-                self.shared_info.color_graphs = line_color
-                self.shared_info.pending_updates_main = True
+                num_graphs = 0
 
-            if time_scale is not self.shared_info.time_scale:
-                config = configparser.ConfigParser()
-                path = os.path.join(os.path.dirname(__file__), 'config.ini')
-                config.read(path)
-                config['SETTINGS']['time_scale'] = time_scale
-                with open(path, 'w') as configfile:
-                    config.write(configfile)
-                self.shared_info.time_scale = time_scale
-                self.shared_info.pending_updates_main = True
+                for name in sorted_graphs_to_keep:
+                    num_graphs = num_graphs + 1
+                    a = Anime(anime_name=name, anime_order=num_graphs)
+                    a.save()
 
-            return data, dropdown, div_style#, reorder_data, reorder_dropdown
+                if line_color != self.shared_info.color_graphs:
+                    config = configparser.ConfigParser()
+                    path = os.path.join(os.path.dirname(__file__), 'config.ini')
+                    config.read(path)
+                    config['SETTINGS']['color'] = line_color
+                    with open(path, 'w') as configfile:
+                        config.write(configfile)
+                    self.shared_info.color_graphs = line_color
+                    self.shared_info.pending_updates_main = True
+
+                if time_scale != self.shared_info.time_scale:
+                    config = configparser.ConfigParser()
+                    path = os.path.join(os.path.dirname(__file__), 'config.ini')
+                    config.read(path)
+                    config['SETTINGS']['time_scale'] = time_scale
+                    with open(path, 'w') as configfile:
+                        config.write(configfile)
+                    self.shared_info.time_scale = time_scale
+                    self.shared_info.pending_updates_main = True
+
+                children = "Status: Settings updated correctly. Duplicate or invalid re-orders (if any) were re-assigned."
+
+
+            # Update dropdown based on new objects
+            dropdown = self.init_dropdown()
+
+            # Update table data to reflect database
+            data = self.init_data()
+
+            return data, dropdown, children
         
         
     def serve_layout(self):
         if self.shared_info.pending_updates_edit:
             self.shared_info.pending_updates_edit = False
             self.table = self.init_table('Remove', 5)
-            #self.reorder_table = self.init_reorder_table()
 
         return html.Div([
                 html.H1("Settings"),
@@ -152,10 +119,8 @@ class Edit_Container:
                          clearable=False,
                          searchable=False
                          ),
-                html.Button('Submit Changes', id="remove_graphs", n_clicks=0),
-                html.Div([html.H2('Invalid Input: 2 or more elements have the same order',style={'color':'red'})],id='hidden_div',style={'display':'none'},)
-                #self.reorder_table,
-                #html.Button('Reorder Graphs', id="reorder_btn", n_clicks=0),
+                html.P(id='status_message', children=self.status_default, style={'font-style': 'italic'}),
+                html.Button('Submit Changes', id="remove_graphs", n_clicks=0)
         ])
 
 
@@ -190,6 +155,7 @@ class Edit_Container:
                       "id": "Order",
                       "presentation": "dropdown",
                       "editable": True}],
+            dropdown=self.init_dropdown(),
             data=self.init_data(),
             page_size=pg_size,
         )
@@ -197,12 +163,34 @@ class Edit_Container:
         return layout
 
     def init_data(self):
-        data = []
+        self.start_data = []
         self.graphs_list = []
         for a in Anime.objects.raw('SELECT anime_name FROM home_anime ORDER BY anime_order ASC'):
-            p = str(a)
-            self.graphs_list.append(p)
-        for title in self.graphs_list:
-            data.append({'Name': title, 'Remove Graph(s)': "Don't remove Graph"})
-        return data
-    
+            self.graphs_list.append(str(a))
+            self.start_data.append({'Name': a.anime_name, 'Remove Graph(s)': "Don't remove Graph", 'Order': a.anime_order})
+        return self.start_data
+
+    def init_dropdown(self):
+        options = []
+
+        for i in range(1, Anime.objects.count() + 1):
+            options.append({'label': str(i) + "⠀⠀", 'value': i})
+
+        dropdown = {
+            'Remove Graph(s)': {
+                'options': [
+                    {'label': "No", 'value': "Don't remove Graph"},
+                    {'label': "Yes", 'value': "Remove Graph"}
+                ],
+                'clearable': False,
+                'searchable': False
+            },
+            'Order': {
+                'options': options,
+                'clearable': False,
+                'searchable': False
+            }
+        }
+
+        return dropdown
+
