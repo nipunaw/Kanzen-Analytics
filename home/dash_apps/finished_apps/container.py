@@ -234,7 +234,7 @@ class Container:
             self.status_children = "Status: Max graphs (5) limit reached. Graphs may be removed via 'Settings' page."
             self.max_graphs = True
         else:
-            self.status_children = "Status: No issues. Feel free to add graphs ("+str(num_graphs)+"/5 total limit)"
+            self.status_children = "Status: No changes made yet. Feel free to add graphs ("+str(num_graphs)+"/5 total limit)"
             self.max_graphs = False
 
         return html.Div([
