@@ -22,6 +22,7 @@ dash-html-components==1.1.2
 dash-renderer==1.9.0
 dash-table==4.11.2
 Django==3.1.6
+django-environ==0.4.5
 django-plotly-dash==1.6.1
 django-redis==4.12.1
 dpd-components==0.1.0
