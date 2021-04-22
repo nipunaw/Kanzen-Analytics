@@ -237,6 +237,8 @@ class Container:
             self.status_children = "Status: No changes made yet. Feel free to add graphs ("+str(num_graphs)+"/5 total limit)"
             self.max_graphs = False
 
+        graph_area = self.div
+
         return html.Div([
             html.Div(
                 id='searchtablearea',
@@ -283,7 +285,8 @@ class Container:
                      html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs", disabled=self.max_graphs),
                 ])
             ]),
-            self.div
+            graph_area,
+            html.P("Test"),
         ])
 
     def init_graph(self):
