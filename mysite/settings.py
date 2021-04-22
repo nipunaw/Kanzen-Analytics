@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '#cztue-04&(&za20ven+c1kkz^+kn5*mua-4hx4a!wz!l58e*9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'kanzenanalytics.herokuapp.com',
