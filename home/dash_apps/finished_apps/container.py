@@ -6,6 +6,7 @@ from django_plotly_dash import DjangoDash
 from jikanpy import Jikan
 from home.dash_apps.finished_apps import graphs
 from home.models import Anime
+from pytrends.request import exceptions
 
 # Stores all custom graphs
 
@@ -24,7 +25,7 @@ class Container:
         self.div = html.Div(id="graphcontainer")
 
         self.status_children = "Status: No issues. Feel free to add graphs"
-        self.add_graphs_disabled = False
+        self.max_graphs = False
 
         self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
         self.genre_options = [
@@ -96,7 +97,6 @@ class Container:
             [Output('table', 'data'),
              Output('table', 'dropdown')],
             [Input('search_button', 'n_clicks'),
-             # Input("searchname", "value"),
              Input("searchname", 'n_submit'),
              State("searchname", "value"),
              State('genre_dropdown', 'value'),
@@ -114,7 +114,6 @@ class Container:
 
             if searchname is not None:
                 data = []
-                # self.search_anime_gender_birthday(1)
                 selected_genre = int(genre_dropdown) - 1
                 selected_category = (self.category_options[int(category_dropdown) - 1]['label'])
                 results = self.search_anime(searchname, selected_genre, selected_category, start_date, end_date)
@@ -145,44 +144,85 @@ class Container:
         def add_graph(n_clicks, data):
             id = 'graph-{}'.format(n_clicks)
 
-            disable_add_button = self.add_graphs_disabled
+            disable_add_button = self.max_graphs
             children = self.status_children
-            flag_duplicates = False
 
-            names_to_query = []
+            names_added = []
+            names_no_data = []
+            names_duplicate = []
+            names_above_max = []
+
             num_graphs = Anime.objects.count()
-            for i in data:
-                if i['Add Graph(s)'] == 'Add Graph' and num_graphs < 5:
-                    if i['Name'] not in self.names_list:
-                        num_graphs = num_graphs + 1
-                        self.names_list.append(i['Name'])
-                        names_to_query.append(i['Name'])
-                        a = Anime(anime_name=i['Name'], anime_order=num_graphs)
-                        a.save()
-                        children = "Status: Graph(s) added successfully. " + str(num_graphs) + "/5 in total."
-                    else:
-                        flag_duplicates = True
-                        children = "Status: Duplicate entries were detected; only non-duplicates (if any) were added."
-                elif num_graphs >= 5:
+
+            if n_clicks > 0:
+                for i in data:
+                    if i['Add Graph(s)'] == 'Add Graph':
+                        if num_graphs < 5:
+                            if i['Name'] not in self.names_list:
+                                try:
+                                    test = graphs.Graphs(i['Name'] + 'app', i['Name'], i['Name'], i['Name'] + 'slider',
+                                                         False,
+                                                         [Input(i['Name'] + 'slider', 'value')],
+                                                         self.shared_info.color_graphs,
+                                                         self.shared_info.time_scale, i['Name'])
+                                    self.graphs_list.append(test.return_layout())  # Potentially causes exception
+
+                                    self.names_list.append(i['Name'])
+                                    names_added.append(i['Name'])
+
+                                    num_graphs = num_graphs + 1
+                                    a = Anime(anime_name=i['Name'], anime_order=num_graphs)
+                                    a.save()
+
+                                except exceptions.ResponseError:
+                                    names_no_data.append(i['Name'])
+
+                            else:
+                                names_duplicate.append(i['Name'])
+                        else:
+                            names_above_max.append(i['Name'])
+
+                str_names = ""
+                str_no_data = ""
+                str_duplicates = ""
+                str_above = ""
+
+                if num_graphs == 5:
                     disable_add_button = True
-                    children = "Status: Max graphs (5) limit reached. Graphs may be removed via 'Settings' page."
-                    if flag_duplicates:
-                        children = "Status: Max graphs (5) limit reached. Duplicates that were detected were not added."
+                    self.max_graphs = True
 
-            if n_clicks > 0 and len(names_to_query) > 0:
-                self.shared_info.pending_updates_edit = True
-                self.shared_info.pending_updates_export = True
-                for i in names_to_query:
-                    test = graphs.Graphs(i + 'app', i, i, i + 'slider', False,
-                                         [Input(i + 'slider', 'value')], self.shared_info.color_graphs,
-                                         self.shared_info.time_scale, i)
+                if len(names_added) > 0:
+                    self.shared_info.pending_updates_edit = True
+                    self.shared_info.pending_updates_export = True
+                    str_names = "Added (" + str(num_graphs) + "/5 total limit): "
+                    for i in names_added:
+                        str_names = str_names + i + "; "
+                if len(names_no_data) > 0:
+                    str_no_data = "Not added (no search data or rate limit exceeded): "
+                    for i in names_no_data:
+                        str_no_data = str_no_data + i + "; "
 
-                    self.graphs_list.append(
-                        test.return_layout())  # dcc.Graph(id='graph-{}'.format(n_clicks), figure=test.return_fig())
-            if self.shared_info.pending_updates_main:
-                self.shared_info.pending_updates_main = False
-                self.div = html.Div(children=self.init_graph(), id="graphcontainer")
-                return self.div, children, disable_add_button
+                if len(names_duplicate) > 0:
+                    str_duplicates = "Not added (duplicate graph): "
+                    for i in names_duplicate:
+                        str_duplicates = str_duplicates + i + "; "
+
+                if len(names_above_max) > 0:
+
+                    str_above = "Not added (exceeded 5-graph limit): "
+                    for i in names_above_max:
+                        str_above = str_above + i + "; "
+
+                if len(str_names) > 0 or len(str_no_data) > 0 or len(str_duplicates) > 0 or len(str_above) > 0:
+                    children = "Status - "
+                    if len(str_names) > 0:
+                        children = children + str_names
+                    if len(str_no_data) > 0:
+                        children = children + str_no_data
+                    if len(str_duplicates) > 0:
+                        children = children + str_duplicates
+                    if len(str_above) > 0:
+                        children = children + str_above
 
             return html.Div(self.graphs_list), children, disable_add_button
 
@@ -195,10 +235,13 @@ class Container:
 
         if num_graphs == 5:
             self.status_children = "Status: Max graphs (5) limit reached. Graphs may be removed via 'Settings' page."
-            self.add_graphs_disabled = True
+            self.max_graphs = True
         else:
-            self.status_children = "Status: No issues. Feel free to add graphs (" + str(num_graphs) + "/5 total limit)"
-            self.add_graphs_disabled = False
+            self.status_children = "Status: No changes made yet. Feel free to add graphs (" + str(
+                num_graphs) + "/5 total limit)"
+            self.max_graphs = False
+
+        graph_area = self.div
 
         return html.Div([
             html.Div(
@@ -242,12 +285,12 @@ class Container:
                         id='tablearea',
                         children=
                         [self.init_table(),
-                         html.P(id='status_message', children=self.status_children),
+                         html.P(id='status_message', children=self.status_children, style={'font-style': 'italic'}),
                          html.Button(id="add_graphs", n_clicks=0, children="Add selected graphs",
-                                     disabled=self.add_graphs_disabled),
+                                     disabled=self.max_graphs),
                          ])
                 ]),
-            self.div
+            graph_area,
         ])
 
     def init_graph(self):
@@ -327,7 +370,12 @@ class Container:
                       "editable": True,
                       }
                      ],
-            data=[],
+            dropdown={},
+            data=[{'Name': "", 'Add Graph(s)': ""},
+                  {'Name': "", 'Add Graph(s)': ""},
+                  {'Name': "", 'Add Graph(s)': ""},
+                  {'Name': "", 'Add Graph(s)': ""},
+                  {'Name': "", 'Add Graph(s)': ""}],
             page_size=pg_size,
         )
 
