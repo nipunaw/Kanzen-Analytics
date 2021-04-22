@@ -286,7 +286,6 @@ class Container:
                 ])
             ]),
             graph_area,
-            html.P("Test"),
         ])
 
     def init_graph(self):

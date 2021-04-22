@@ -14,7 +14,7 @@ class Edit_Container:
     def __init__(self, id:str, shared_info):
         self.shared_info = shared_info
         self.shared_info.pending_updates_edit = True
-        self.graphs_list = []
+        # self.graphs_list = []
         self.app = DjangoDash(id, external_stylesheets=external_stylesheets)
         self.table = dash_table.DataTable()
         self.status_default = "Status: No changes made yet; feel free to update settings."
@@ -164,9 +164,9 @@ class Edit_Container:
 
     def init_data(self):
         self.start_data = []
-        self.graphs_list = []
+        # self.graphs_list = []
         for a in Anime.objects.raw('SELECT anime_name FROM home_anime ORDER BY anime_order ASC'):
-            self.graphs_list.append(str(a))
+            # self.graphs_list.append(str(a))
             self.start_data.append({'Name': a.anime_name, 'Remove Graph(s)': "Don't remove Graph", 'Order': a.anime_order})
         return self.start_data
 
